@@ -55,6 +55,24 @@ public:
     void setTriggerLength(int l) {
         triggerLength = l;
     }
+
+    bool isActive() {
+         return triggerOffPos > 0;
+    }
+};
+
+
+class KernelSeq {
+    float ppq;
+    int sampleRate;
+public:
+    void setppq(float p) {
+        ppq = p;
+    }
+
+    int toTrigger(int div, int size) {
+        
+    }
 };
 
 class StepSequencer {
@@ -66,8 +84,8 @@ public:
 
     }
 
-    int triggerPos(int ppq, int sampleRate) {
-        return -1;
+    int triggerPos(float ppq, int sampleRate) {
+         return -1;
     }
 };
 
@@ -80,13 +98,13 @@ public:
         muted = m;
     }
 
-    void triggerSeq(Trigger *triggers, int ppq, int sampleRate) {
-        if ( muted )
-            return;
+    void triggerSeq(Trigger *triggers, float ppq, int sampleRate) {
+         if ( muted )
+             return;
 
-        for(int i=0;i<NUM_SEQ;i++) {
-            int pos = seq[i].triggerPos(ppq, sampleRate);
+         for(int i=0;i<NUM_SEQ;i++) {
+             int pos = seq[i].triggerPos(ppq, sampleRate);
 
-        }
+         }
     }
 };
