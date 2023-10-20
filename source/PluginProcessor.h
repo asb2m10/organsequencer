@@ -2,7 +2,7 @@
 
 #include <juce_audio_processors/juce_audio_processors.h>
 #include "StepSequencer.hpp"
-
+#include "Sequencer.hpp"
 
 //==============================================================================
 class AudioPluginAudioProcessor  : public juce::AudioProcessor
