@@ -8,7 +8,8 @@ juce_add_plugin(OrganSeq
     # VERSION ...                               # Set this if the plugin version is different to the project version
     # ICON_BIG ...                              # ICON_* arguments specify a path to an image file to use as an icon for the Standalone
     # ICON_SMALL ...
-    # COMPANY_NAME "Digital Subuurban"            # Specify the name of the plugin's author
+    COMPANY_NAME "Digital Suburban"             # Specify the name of the plugin's author
+    BUNDLE_ID "digitalsuburban"
     # IS_SYNTH TRUE/FALSE                       # Is this a synth or an effect?
     NEEDS_MIDI_INPUT TRUE                       # Does the plugin need midi input?
     NEEDS_MIDI_OUTPUT TRUE                      # Does the plugin need midi output?
@@ -18,7 +19,7 @@ juce_add_plugin(OrganSeq
     PLUGIN_MANUFACTURER_CODE DGSB               # A four-character manufacturer id with at least one upper-case character
     PLUGIN_CODE ORGS                            # A unique four-character plugin id with exactly one upper-case character
                                                 # GarageBand 10.3 requires the first letter to be upper-case, and the remaining letters to be lower-case
-    FORMATS AU VST3 Standalone                  # The formats to build. Other valid formats are: AAX Unity VST AU AUv3
+    FORMATS VST3 Standalone                     # The formats to build. Other valid formats are: AAX Unity VST AU AUv3
     PRODUCT_NAME "Organic Sequencer")           # The name of the final executable, which can differ from the target name
 
 

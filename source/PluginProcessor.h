@@ -2,11 +2,14 @@
 
 #include <juce_audio_processors/juce_audio_processors.h>
 #include "StepSequencer.hpp"
-#include "Sequencer.hpp"
+#include "Model.hpp"
 
 //==============================================================================
 class AudioPluginAudioProcessor  : public juce::AudioProcessor
 {
+    Sequencer sequencer;
+    Trigger triggers[NUM_SEQ];
+    Pattern pattern;
 public:
     //==============================================================================
     AudioPluginAudioProcessor();
