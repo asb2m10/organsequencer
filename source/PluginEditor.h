@@ -10,10 +10,12 @@ public:
     explicit AudioPluginAudioProcessorEditor (AudioPluginAudioProcessor&);
     ~AudioPluginAudioProcessorEditor() override;
 
+    PatternEditor patternEditor;
+
     //==============================================================================
     void paint (juce::Graphics&) override;
     void resized() override;
-
+    void mouseDown(const MouseEvent &event);
 private:
     // This reference is provided as a quick way for your editor to
     // access the processor object that created it.

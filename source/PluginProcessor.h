@@ -9,8 +9,11 @@ class AudioPluginAudioProcessor  : public juce::AudioProcessor
 {
     Sequencer sequencer;
     Trigger triggers[NUM_SEQ];
-    Pattern pattern;
+    Pattern pattern[8];
+
 public:
+    ValueTree rootVt;
+
     //==============================================================================
     AudioPluginAudioProcessor();
     ~AudioPluginAudioProcessor() override;

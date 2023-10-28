@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.15)
 
 project(ORGANSEQ VERSION 0.0.1)
-
+add_definitions(-w)
 add_subdirectory(libs/JUCE)
 
 juce_add_plugin(OrganSeq
@@ -29,7 +29,8 @@ juce_generate_juce_header(OrganSeq)
 target_sources(OrganSeq
     PRIVATE
         source/PluginEditor.cpp
-        source/PluginProcessor.cpp)
+        source/PluginProcessor.cpp
+        source/ext/value_tree_debugger.cpp)
 
 
 target_compile_definitions(OrganSeq
@@ -37,6 +38,7 @@ target_compile_definitions(OrganSeq
         # JUCE_WEB_BROWSER and JUCE_USE_CURL would be on by default, but you might not need them.
         JUCE_WEB_BROWSER=0  # If you remove this, add `NEEDS_WEB_BROWSER TRUE` to the `juce_add_plugin` call
         JUCE_USE_CURL=0     # If you remove this, add `NEEDS_CURL TRUE` to the `juce_add_plugin` call
+        JUCE_DISPLAY_SPLASH_SCREEN=0
         JUCE_VST3_CAN_REPLACE_VST2=0)
 
 target_link_libraries(OrganSeq

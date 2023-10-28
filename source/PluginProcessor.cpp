@@ -11,6 +11,23 @@ AudioPluginAudioProcessor::AudioPluginAudioProcessor()
                        .withOutput ("Output", juce::AudioChannelSet::stereo(), true)
                      #endif
                        ) {
+    ValueTree root(IDs::ROOT);
+    root.setProperty(IDs::bpm, 120, nullptr);
+
+    ValueTree patterns(IDs::PATTERNS);
+    for(int i=0;i<8;i++)
+        patterns.addChild(pattern[i].value, 8, nullptr);
+    root.addChild(patterns,-1, nullptr);
+
+    ValueTree triggers(IDs::TRIGGERS);
+    for(int i=0;i<8;i++) {
+        ValueTree trigger(IDs::trigger);
+        trigger.setProperty(IDs::triggerMidi, 60, nullptr);
+        triggers.addChild(trigger, 0, nullptr);
+    }
+    root.addChild(triggers,-1, nullptr);
+
+    rootVt = root;
 }
 
 AudioPluginAudioProcessor::~AudioPluginAudioProcessor()
@@ -150,7 +167,8 @@ void AudioPluginAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
         sequencer.invalidatePos();
     }
 
-    pattern.process(triggers, sequencer);
+    for(int i=0;i<8;i++)
+        pattern[i].process(triggers, sequencer);
 
     for(int i=0;i<NUM_SEQ;i++) {
         triggers[i].advance(midiMessages, buffer.getNumSamples());

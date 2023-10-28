@@ -1,14 +1,17 @@
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
+#include "ext/value_tree_debugger.h"
 
 //==============================================================================
 AudioPluginAudioProcessorEditor::AudioPluginAudioProcessorEditor (AudioPluginAudioProcessor& p)
     : AudioProcessorEditor (&p), processorRef (p)
 {
-    juce::ignoreUnused (processorRef);
+    addAndMakeVisible(patternEditor);
     // Make sure that before the constructor has finished, you've set the
     // editor's size to whatever you need it to be.
-    setSize (400, 300);
+    setSize (600, 500);
+
+    patternEditor.setValue(processorRef.rootVt.getChildWithName(IDs::PATTERNS).getChild(0));
 }
 
 AudioPluginAudioProcessorEditor::~AudioPluginAudioProcessorEditor()
@@ -28,6 +31,15 @@ void AudioPluginAudioProcessorEditor::paint (juce::Graphics& g)
 
 void AudioPluginAudioProcessorEditor::resized()
 {
-    // This is generally where you'll want to lay out the positions of any
-    // subcomponents in your editor..
+    int width = getWidth();
+    int height = getHeight();
+
+    patternEditor.setBounds(5, 5, width - 10, height - 10);
+}
+
+void AudioPluginAudioProcessorEditor::mouseDown(const MouseEvent &event) {
+        //printf("ref %s\n", processorRef.rootVt.toXmlString().toRawUTF8());
+
+        auto vd = new ValueTreeDebugger();
+        vd->setSource(processorRef.rootVt);
 }

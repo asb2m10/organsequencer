@@ -1,6 +1,7 @@
 #pragma once
 
 #include "PluginProcessor.h"
+#include "Model.hpp"
 
 const int NUM_SEQ = 8;
 
@@ -107,12 +108,12 @@ public:
 
 
 class Pattern {
-    bool muted = false;
+    juce::CachedValue<bool> muted;
 
-    struct ArrSeq {
+    struct ArrSeq : public ValueTree::Listener {
         float values[64];
-        int size = 16;
-        float ppq = 1.0;
+        juce::CachedValue<float> ppq;
+        juce::CachedValue<int> size;
         bool muted = false;
 
         int currentPos;
@@ -130,13 +131,44 @@ class Pattern {
                 trigger->fire(target);
             }
         }
+        void valueTreePropertyChanged(ValueTree &tree, const Identifier &property) {
+            if ( property != IDs::arrayValue )
+                return;
+
+            String newValue = tree.getProperty(IDs::arrayValue).toString();
+            for(int i=0;i<size;i++) {
+                if ( newValue[i] == '0' )
+                    values[i] = 0;
+                else
+                    values[i] = 1;
+            }
+        }
     };
     ArrSeq arrseq[NUM_SEQ];
 
 public:
+    ValueTree value;
 
-    void setMuted(bool m) {
-        muted = m;
+    Pattern() {
+        value = ValueTree(IDs::pattern);
+        for(int i=0;i<8;i++) {
+            ValueTree arraySeq(IDs::ARRAYSEQ);
+            arraySeq.setProperty(IDs::arrayValue, "0000000000000000", nullptr);
+            arraySeq.setProperty(IDs::arraySize, 16, nullptr);
+            arraySeq.setProperty(IDs::arrayPpq, 1.0, nullptr);
+
+            arrseq[i].ppq.referTo(arraySeq, IDs::arrayPpq, nullptr);
+            arrseq[i].size.referTo(arraySeq, IDs::arraySize, nullptr);
+
+            value.addListener(arrseq);
+            value.addChild(arraySeq, i, nullptr);
+        }
+        value.setProperty(IDs::patternMuted, false, nullptr);
+        muted.referTo(value, IDs::patternMuted, nullptr);
+    }
+
+    bool isMuted() {
+        return muted;
     }
 
     void process(Trigger trigger[], Sequencer &seq) {
