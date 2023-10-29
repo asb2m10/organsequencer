@@ -22,8 +22,8 @@ AudioPluginAudioProcessor::AudioPluginAudioProcessor()
     ValueTree triggers(IDs::TRIGGERS);
     for(int i=0;i<8;i++) {
         ValueTree trigger(IDs::trigger);
-        trigger.setProperty(IDs::triggerMidi, 60, nullptr);
-        triggers.addChild(trigger, 0, nullptr);
+        trigger.setProperty(IDs::triggerMidi, 60 + i, nullptr);
+        triggers.addChild(trigger, i, nullptr);
     }
     root.addChild(triggers,-1, nullptr);
 

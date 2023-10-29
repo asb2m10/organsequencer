@@ -39,7 +39,7 @@ public:
         g.fillAll(Colours::darkgrey);
 
         for(int i=0;i<size;i++) {
-            if ( values[i] != 1 )
+            if ( values[i] != 0 )
                 g.setColour(juce::Colours::orange);
             else
                 g.setColour(juce::Colours::black);
@@ -100,7 +100,9 @@ class RowEditor : public Component {
     ValueTree values;;
     StepEditor stepEditor;
     Slider size;
+    Slider trigger;
     Slider drift;
+    ValueTree vtTrigger;
 
 public:
     RowEditor() {
@@ -108,6 +110,7 @@ public:
         addAndMakeVisible(size);
         addAndMakeVisible(primPpq);
         addAndMakeVisible(drift);
+        addAndMakeVisible(trigger);
 
         primPpq.addItemList(PPQ_VALUES, 1);
 
@@ -122,6 +125,15 @@ public:
             stepEditor.repaint();
         };
 
+        trigger.setSliderStyle(Slider::SliderStyle::LinearBarVertical);
+        trigger.setSliderSnapsToMousePosition(false);
+        trigger.setColour(Slider::trackColourId, Colours::transparentBlack);
+        trigger.setRange(1, 127, 1);
+        trigger.onValueChange = [this] {
+            int newTrigger = (int)size.getValue();
+            vtTrigger.setProperty(IDs::triggerMidi, newTrigger, nullptr);
+        };
+
         drift.setSliderStyle(Slider::SliderStyle::Rotary);
         drift.setTextBoxStyle(Slider::TextEntryBoxPosition::NoTextBox, true, 0, 0);
         drift.setRange(-4, 4, 0.25);
@@ -134,8 +146,9 @@ public:
     void resized() {
         primPpq.setBounds(10, 5, 70, 30);
         drift.setBounds(90, 5, 50, 30);
-        stepEditor.setBounds(160, 5, getWidth() - 160 - 50, 30);
-        size.setBounds(getWidth() - 40, 5, 30, 30);
+        stepEditor.setBounds(160, 5, getWidth() - 160 - 50 - 50, 30);
+        size.setBounds(getWidth() - 90, 5, 30, 30);
+        trigger.setBounds(getWidth() - 40, 5, 30, 30);
     }
 
     void setValue(ValueTree vt) {
@@ -145,6 +158,12 @@ public:
         stepEditor.setSize(targetSize);
         values = vt;
         repaint();
+    }
+
+    void setTrigger(ValueTree vt) {
+        int targetNote = vt.getProperty(IDs::triggerMidi);
+        trigger.setValue(targetNote, NotificationType::dontSendNotification);
+        vtTrigger = vt;
     }
 };
 
@@ -158,6 +177,12 @@ public:
         }
     }
 
+    void setTriggers(ValueTree vt) {
+        for(int i=0;i<8;i++) {
+            rowEditors[i].setTrigger(vt.getChild(i));
+        }
+    }
+
     void resized() {
         int ratio = (getHeight()-10) / 8;
         for(int i=0;i<8;i++) {
@@ -166,11 +191,10 @@ public:
     }
 
     void paint(juce::Graphics &g) {
-        //g.fillAll(getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId));
         g.fillAll(Colours::lightgrey);
     }
 
-    void setValue(ValueTree vt) {
+    void setActivePattern(ValueTree vt) {
         for(int i=0;i<8;i++) {
             rowEditors[i].setValue(vt.getChild(i));
         }

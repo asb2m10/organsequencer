@@ -6,13 +6,13 @@
 const int NUM_SEQ = 8;
 
 class Trigger {
-public:
-    int note = 40;
     int velocity = 100;
     int panicnote = -1;
     int triggerPos = -1;
     int triggerOffPos = -1;
     int triggerLength = 4410;
+public:
+    CachedValue<int> note;
 
     void advance(juce::MidiBuffer& midiMessages, int s) {
         if ( panicnote >= 0 ) {
@@ -59,10 +59,9 @@ public:
     }
 
     bool isActive() {
-         return triggerOffPos > 0;
+        return triggerOffPos > 0;
     }
 };
-
 
 class Sequencer {
     int sampleRate;
@@ -105,7 +104,6 @@ public:
         return -1;
     }
 };
-
 
 class Pattern {
     juce::CachedValue<bool> muted;
@@ -163,7 +161,7 @@ public:
             value.addListener(arrseq);
             value.addChild(arraySeq, i, nullptr);
         }
-        value.setProperty(IDs::patternMuted, false, nullptr);
+        value.setProperty(IDs::patternMuted, true, nullptr);
         muted.referTo(value, IDs::patternMuted, nullptr);
     }
 

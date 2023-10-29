@@ -4,42 +4,37 @@
 
 //==============================================================================
 AudioPluginAudioProcessorEditor::AudioPluginAudioProcessorEditor (AudioPluginAudioProcessor& p)
-    : AudioProcessorEditor (&p), processorRef (p)
-{
+    : AudioProcessorEditor (&p), processorRef (p) {
     addAndMakeVisible(patternEditor);
     // Make sure that before the constructor has finished, you've set the
     // editor's size to whatever you need it to be.
-    setSize (600, 500);
+    setSize (700, 600);
 
-    patternEditor.setValue(processorRef.rootVt.getChildWithName(IDs::PATTERNS).getChild(0));
+    patternEditor.setActivePattern(processorRef.rootVt.getChildWithName(IDs::PATTERNS).getChild(0));
+    patternEditor.setTriggers(processorRef.rootVt.getChildWithName(IDs::TRIGGERS));
 }
 
-AudioPluginAudioProcessorEditor::~AudioPluginAudioProcessorEditor()
-{
+AudioPluginAudioProcessorEditor::~AudioPluginAudioProcessorEditor() {
 }
 
 //==============================================================================
-void AudioPluginAudioProcessorEditor::paint (juce::Graphics& g)
-{
+void AudioPluginAudioProcessorEditor::paint (juce::Graphics& g) {
     // (Our component is opaque, so we must completely fill the background with a solid colour)
     g.fillAll (getLookAndFeel().findColour (juce::ResizableWindow::backgroundColourId));
 
     g.setColour (juce::Colours::white);
-    g.setFont (15.0f);
-    g.drawFittedText ("Hello World!", getLocalBounds(), juce::Justification::centred, 1);
+    // g.setFont (15.0f);
+    // g.drawFittedText ("Hello World!", getLocalBounds(), juce::Justification::centred, 1);
 }
 
-void AudioPluginAudioProcessorEditor::resized()
-{
+void AudioPluginAudioProcessorEditor::resized() {
     int width = getWidth();
     int height = getHeight();
 
-    patternEditor.setBounds(5, 5, width - 10, height - 10);
+    patternEditor.setBounds(5, 5, width - 10, height - 100);
 }
 
 void AudioPluginAudioProcessorEditor::mouseDown(const MouseEvent &event) {
-        //printf("ref %s\n", processorRef.rootVt.toXmlString().toRawUTF8());
-
-        auto vd = new ValueTreeDebugger();
-        vd->setSource(processorRef.rootVt);
+    auto vd = new ValueTreeDebugger();
+    vd->setSource(processorRef.rootVt);
 }
