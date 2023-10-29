@@ -15,17 +15,21 @@ AudioPluginAudioProcessor::AudioPluginAudioProcessor()
     root.setProperty(IDs::bpm, 120, nullptr);
 
     ValueTree patterns(IDs::PATTERNS);
-    for(int i=0;i<8;i++)
-        patterns.addChild(pattern[i].value, 8, nullptr);
+    for(int i=0;i<8;i++) {
+        patterns.addChild(pattern[i].value, -1, nullptr);
+
+        if ( i == 0 ) {
+            patterns.getChild(0).setProperty(IDs::patternMuted, false, nullptr);
+        }
+    }
     root.addChild(patterns,-1, nullptr);
 
-    ValueTree triggers(IDs::TRIGGERS);
+    ValueTree vtTriggers(IDs::TRIGGERS);
     for(int i=0;i<8;i++) {
-        ValueTree trigger(IDs::trigger);
-        trigger.setProperty(IDs::triggerMidi, 60 + i, nullptr);
-        triggers.addChild(trigger, i, nullptr);
+        vtTriggers.addChild(triggers[i].vtTrigger, -1, nullptr);
+        triggers[i].vtTrigger.setProperty(IDs::triggerMidi, 48 + i, nullptr);
     }
-    root.addChild(triggers,-1, nullptr);
+    root.addChild(vtTriggers,-1, nullptr);
 
     rootVt = root;
 }
@@ -109,8 +113,7 @@ void AudioPluginAudioProcessor::prepareToPlay (double sampleRate, int samplesPer
     sequencer.setSampleRate(sampleRate);
 
     for(int i=0;i<NUM_SEQ;i++) {
-        triggers[i].setNote(60);
-        triggers[i].setTriggerLength(0.25 * sampleRate);
+        triggers[i].setTriggerLength(0.5 * sampleRate);
     }
 }
 

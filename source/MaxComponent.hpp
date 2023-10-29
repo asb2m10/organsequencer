@@ -3,9 +3,6 @@
 #include <stdlib.h>
 #include "PluginProcessor.h"
 
-const StringArray PPQ_VALUES    = { "1/1", "1/2", "1/4", "1/8", "1/16" };
-const float       PPQ_CORRESP[] = {   4.0,   2.0,   1.0,   0.5,   0.25 };
-
 class StepEditor : public Component {
     int values[64];
 
@@ -97,7 +94,7 @@ public:
 
 class RowEditor : public Component {
     ComboBox primPpq;
-    ValueTree values;;
+    ValueTree values;
     StepEditor stepEditor;
     Slider size;
     Slider trigger;
@@ -113,6 +110,9 @@ public:
         addAndMakeVisible(trigger);
 
         primPpq.addItemList(PPQ_VALUES, 1);
+        primPpq.onChange = [this] {
+            values.setProperty(IDs::arrayPpq, primPpq.getSelectedItemIndex(), nullptr);
+        };
 
         size.setSliderStyle(Slider::SliderStyle::LinearBarVertical);
         size.setSliderSnapsToMousePosition(false);
@@ -130,7 +130,7 @@ public:
         trigger.setColour(Slider::trackColourId, Colours::transparentBlack);
         trigger.setRange(1, 127, 1);
         trigger.onValueChange = [this] {
-            int newTrigger = (int)size.getValue();
+            int newTrigger = (int)trigger.getValue();
             vtTrigger.setProperty(IDs::triggerMidi, newTrigger, nullptr);
         };
 
@@ -156,6 +156,9 @@ public:
         size.setValue(targetSize, NotificationType::dontSendNotification);
         stepEditor.setValues(vt);
         stepEditor.setSize(targetSize);
+        int ppqIndex = vt.getProperty(IDs::arrayPpq);
+        primPpq.setSelectedItemIndex(ppqIndex, NotificationType::dontSendNotification);
+
         values = vt;
         repaint();
     }

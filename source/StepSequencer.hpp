@@ -4,15 +4,23 @@
 #include "Model.hpp"
 
 const int NUM_SEQ = 8;
+const StringArray PPQ_VALUES    = { "1/1", "1/2",  "1/4", "1/8", "1/16",  "1/32" };
+const float       PPQ_CORRESP[] = {   4.0,   2.0,    1.0,   0.5,   0.25,   0.125 };
 
-class Trigger {
+class Trigger : public ValueTree::Listener {
     int velocity = 100;
     int panicnote = -1;
     int triggerPos = -1;
     int triggerOffPos = -1;
     int triggerLength = 4410;
 public:
-    CachedValue<int> note;
+    ValueTree vtTrigger;
+    int note = 0;
+
+    Trigger() {
+        vtTrigger = ValueTree(IDs::trigger);
+        vtTrigger.addListener(this);
+    }
 
     void advance(juce::MidiBuffer& midiMessages, int s) {
         if ( panicnote >= 0 ) {
@@ -60,6 +68,14 @@ public:
 
     bool isActive() {
         return triggerOffPos > 0;
+    }
+
+    void valueTreePropertyChanged(ValueTree &tree, const Identifier &property) {
+        if ( property != IDs::triggerMidi )
+            return;
+
+        int newNote = tree.getProperty(IDs::triggerMidi);
+        setNote(newNote);
     }
 };
 
@@ -110,7 +126,7 @@ class Pattern {
 
     struct ArrSeq : public ValueTree::Listener {
         float values[64];
-        juce::CachedValue<float> ppq;
+        float ppq = 0.5;
         juce::CachedValue<int> size;
         bool muted = false;
 
@@ -130,15 +146,21 @@ class Pattern {
             }
         }
         void valueTreePropertyChanged(ValueTree &tree, const Identifier &property) {
-            if ( property != IDs::arrayValue )
-                return;
+            if ( property == IDs::arrayValue ) {
+                String newValue = tree.getProperty(IDs::arrayValue).toString();
+                for(int i=0;i<size;i++) {
+                    if ( newValue[i] == '0' )
+                        values[i] = 0;
+                    else
+                        values[i] = 1;
+                }
 
-            String newValue = tree.getProperty(IDs::arrayValue).toString();
-            for(int i=0;i<size;i++) {
-                if ( newValue[i] == '0' )
-                    values[i] = 0;
-                else
-                    values[i] = 1;
+                return;
+            }
+
+            if ( property == IDs::arrayPpq ) {
+                int pos = tree.getProperty(IDs::arrayPpq);
+                ppq = PPQ_CORRESP[pos];
             }
         }
     };
@@ -153,9 +175,8 @@ public:
             ValueTree arraySeq(IDs::ARRAYSEQ);
             arraySeq.setProperty(IDs::arrayValue, "0000000000000000", nullptr);
             arraySeq.setProperty(IDs::arraySize, 16, nullptr);
-            arraySeq.setProperty(IDs::arrayPpq, 1.0, nullptr);
+            arraySeq.setProperty(IDs::arrayPpq, 2, nullptr);
 
-            arrseq[i].ppq.referTo(arraySeq, IDs::arrayPpq, nullptr);
             arrseq[i].size.referTo(arraySeq, IDs::arraySize, nullptr);
 
             value.addListener(arrseq);
