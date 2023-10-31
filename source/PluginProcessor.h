@@ -10,6 +10,11 @@ class AudioPluginAudioProcessor  : public juce::AudioProcessor
     Sequencer sequencer;
     Trigger triggers[NUM_SEQ];
     Pattern pattern[8];
+    double internalJiffies = 0;
+
+    CachedValue<int> bpm;
+    CachedValue<bool> internalSeq;
+    double samplePpq;
 
 public:
     ValueTree rootVt;

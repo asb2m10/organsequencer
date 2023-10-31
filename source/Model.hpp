@@ -7,6 +7,7 @@ namespace IDs
 #define DECLARE_ID(name) const juce::Identifier name (#name);
     DECLARE_ID(ROOT)
     DECLARE_ID(bpm)
+    DECLARE_ID(internalSeq)
     DECLARE_ID(TRIGGERS)
     DECLARE_ID(trigger)
     DECLARE_ID(triggerMidi)

@@ -32,7 +32,7 @@ public:
     }
 
     void paint(juce::Graphics &g) {
-        int ratio = getWidth() / size;
+        float ratio = ((float)getWidth()) / size;
         g.fillAll(Colours::darkgrey);
 
         for(int i=0;i<size;i++) {
@@ -40,7 +40,9 @@ public:
                 g.setColour(juce::Colours::orange);
             else
                 g.setColour(juce::Colours::black);
-            g.fillRect(i*ratio, 0, ratio, getHeight());
+            int x = i*ratio;
+
+            g.fillRect( ratio*i , 0., ratio, ((float)getHeight()) );
         }
     }
 
@@ -48,8 +50,8 @@ public:
         if ( event.mods.isRightButtonDown() )
             return;
 
-        int ratio = getWidth() / size;
-        int target = event.getPosition().getX() / ratio;
+        float ratio = ((float)getWidth()) / size;
+        float target = (int) (((float)event.getPosition().getX()) / ratio);
         jassert(target < size);
         lastActive = target;
         lastAction = ! values[lastActive];
@@ -62,8 +64,8 @@ public:
         if ( event.mods.isRightButtonDown() )
             return;
 
-        int ratio = getWidth() / size;
-        int target = event.getPosition().getX() / ratio;
+        float ratio = ((float)getWidth()) / size;
+        float target = (int) (((float)event.getPosition().getX()) / ratio);
 
         if ( target == lastActive )
             return;
@@ -134,7 +136,7 @@ public:
             vtTrigger.setProperty(IDs::triggerMidi, newTrigger, nullptr);
         };
 
-        drift.setSliderStyle(Slider::SliderStyle::Rotary);
+        drift.setSliderStyle(Slider::SliderStyle::LinearHorizontal);
         drift.setTextBoxStyle(Slider::TextEntryBoxPosition::NoTextBox, true, 0, 0);
         drift.setRange(-4, 4, 0.25);
     }
@@ -144,11 +146,11 @@ public:
     }
 
     void resized() {
-        primPpq.setBounds(10, 5, 70, 30);
-        drift.setBounds(90, 5, 50, 30);
+        primPpq.setBounds(5, 5, 70, 30);
+        drift.setBounds(75, 5, 90, 30);
         stepEditor.setBounds(160, 5, getWidth() - 160 - 50 - 50, 30);
-        size.setBounds(getWidth() - 90, 5, 30, 30);
-        trigger.setBounds(getWidth() - 40, 5, 30, 30);
+        size.setBounds(getWidth() - 73, 5, 30, 30);
+        trigger.setBounds(getWidth() - 34, 5, 30, 30);
     }
 
     void setValue(ValueTree vt) {
@@ -189,7 +191,7 @@ public:
     void resized() {
         int ratio = (getHeight()-10) / 8;
         for(int i=0;i<8;i++) {
-            rowEditors[i].setBounds(5, (i * ratio) + 5, getWidth()-10, ratio - 10);
+            rowEditors[i].setBounds(2, (i * ratio) + 2, getWidth(), ratio-1);
         }
     }
 

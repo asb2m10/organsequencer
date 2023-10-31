@@ -31,7 +31,7 @@ void AudioPluginAudioProcessorEditor::resized() {
     int width = getWidth();
     int height = getHeight();
 
-    patternEditor.setBounds(5, 5, width - 10, height - 100);
+    patternEditor.setBounds(5, 5, width - 5, height - 170);
 }
 
 void AudioPluginAudioProcessorEditor::mouseDown(const MouseEvent &event) {

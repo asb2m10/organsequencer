@@ -13,7 +13,9 @@ AudioPluginAudioProcessor::AudioPluginAudioProcessor()
                        ) {
     ValueTree root(IDs::ROOT);
     root.setProperty(IDs::bpm, 120, nullptr);
-
+    bpm.referTo(root, IDs::bpm, nullptr);
+    root.setProperty(IDs::internalSeq, false, nullptr);
+    internalSeq.referTo(root, IDs::internalSeq, nullptr);
     ValueTree patterns(IDs::PATTERNS);
     for(int i=0;i<8;i++) {
         patterns.addChild(pattern[i].value, -1, nullptr);
@@ -104,17 +106,12 @@ void AudioPluginAudioProcessor::changeProgramName (int index, const juce::String
 }
 
 //==============================================================================
-void AudioPluginAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
-{
-    // Use this method as the place to do any pre-playback
-    // initialisation that you need..
-    juce::ignoreUnused (sampleRate, samplesPerBlock);
-
+void AudioPluginAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlock) {
     sequencer.setSampleRate(sampleRate);
-
     for(int i=0;i<NUM_SEQ;i++) {
         triggers[i].setTriggerLength(0.5 * sampleRate);
     }
+    samplePpq = ( 60.0 / ( bpm * 4 ) ) * sampleRate;
 }
 
 void AudioPluginAudioProcessor::releaseResources()
@@ -157,17 +154,21 @@ void AudioPluginAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
     for (auto i = totalNumInputChannels; i < totalNumOutputChannels; ++i)
         buffer.clear (i, 0, buffer.getNumSamples());
 
-    auto *playhead = getPlayHead();
-    if (playhead != NULL) {
-        juce::AudioPlayHead::CurrentPositionInfo posInfo;
-        playhead->getCurrentPosition(posInfo);
-        if ( posInfo.isPlaying || posInfo.isRecording ) {
-            sequencer.setPos(posInfo.bpm, posInfo.ppqPosition, buffer.getNumSamples());
+    if ( internalSeq ) {
+
+    } else {
+        auto *playhead = getPlayHead();
+        if (playhead != NULL) {
+            juce::AudioPlayHead::CurrentPositionInfo posInfo;
+            playhead->getCurrentPosition(posInfo);
+            if ( posInfo.isPlaying || posInfo.isRecording ) {
+                sequencer.setPos(posInfo.bpm, posInfo.ppqPosition, buffer.getNumSamples());
+            } else {
+                sequencer.invalidatePos();
+            }
         } else {
             sequencer.invalidatePos();
         }
-    } else {
-        sequencer.invalidatePos();
     }
 
     for(int i=0;i<8;i++)
