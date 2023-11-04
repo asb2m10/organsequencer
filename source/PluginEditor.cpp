@@ -6,8 +6,12 @@
 AudioPluginAudioProcessorEditor::AudioPluginAudioProcessorEditor (AudioPluginAudioProcessor& p)
     : AudioProcessorEditor (&p), processorRef (p) {
     addAndMakeVisible(patternEditor);
-    // Make sure that before the constructor has finished, you've set the
-    // editor's size to whatever you need it to be.
+    addAndMakeVisible(bpm);
+    bpm.setSliderStyle(Slider::SliderStyle::LinearBarVertical);
+    bpm.setSliderSnapsToMousePosition(false);
+    bpm.setColour(Slider::trackColourId, Colours::transparentBlack);
+    bpm.setRange(1,63, 1);
+
     setSize (700, 600);
 
     patternEditor.setActivePattern(processorRef.rootVt.getChildWithName(IDs::PATTERNS).getChild(0));
@@ -31,7 +35,8 @@ void AudioPluginAudioProcessorEditor::resized() {
     int width = getWidth();
     int height = getHeight();
 
-    patternEditor.setBounds(5, 5, width - 5, height - 170);
+    bpm.setBounds(5, 5, 40, 20);
+    patternEditor.setBounds(5, 50, width - 5, height - 230);
 }
 
 void AudioPluginAudioProcessorEditor::mouseDown(const MouseEvent &event) {

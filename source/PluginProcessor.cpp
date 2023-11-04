@@ -16,6 +16,7 @@ AudioPluginAudioProcessor::AudioPluginAudioProcessor()
     bpm.referTo(root, IDs::bpm, nullptr);
     root.setProperty(IDs::internalSeq, false, nullptr);
     internalSeq.referTo(root, IDs::internalSeq, nullptr);
+    internalSeq = true;
     ValueTree patterns(IDs::PATTERNS);
     for(int i=0;i<8;i++) {
         patterns.addChild(pattern[i].value, -1, nullptr);
@@ -112,6 +113,7 @@ void AudioPluginAudioProcessor::prepareToPlay (double sampleRate, int samplesPer
         triggers[i].setTriggerLength(0.5 * sampleRate);
     }
     samplePpq = ( 60.0 / ( bpm * 4 ) ) * sampleRate;
+    ppqWindow = ((double)samplesPerBlock) / samplePpq;
 }
 
 void AudioPluginAudioProcessor::releaseResources()
@@ -155,7 +157,8 @@ void AudioPluginAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
         buffer.clear (i, 0, buffer.getNumSamples());
 
     if ( internalSeq ) {
-
+        sequencer.setPos(120, internalJiffies, buffer.getNumSamples());
+        internalJiffies += ppqWindow;
     } else {
         auto *playhead = getPlayHead();
         if (playhead != NULL) {
@@ -171,8 +174,10 @@ void AudioPluginAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
         }
     }
 
-    for(int i=0;i<8;i++)
-        pattern[i].process(triggers, sequencer);
+    pattern[0].process(triggers, sequencer);
+
+    /*for(int i=0;i<8;i++)
+        pattern[i].process(triggers, sequencer);*/
 
     for(int i=0;i<NUM_SEQ;i++) {
         triggers[i].advance(midiMessages, buffer.getNumSamples());

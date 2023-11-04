@@ -11,6 +11,7 @@ public:
     ~AudioPluginAudioProcessorEditor() override;
 
     PatternEditor patternEditor;
+    Slider bpm;
 
     //==============================================================================
     void paint (juce::Graphics&) override;

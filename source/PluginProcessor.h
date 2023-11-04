@@ -15,6 +15,7 @@ class AudioPluginAudioProcessor  : public juce::AudioProcessor
     CachedValue<int> bpm;
     CachedValue<bool> internalSeq;
     double samplePpq;
+    double ppqWindow;
 
 public:
     ValueTree rootVt;

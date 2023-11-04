@@ -125,6 +125,8 @@ class Pattern {
     juce::CachedValue<bool> muted;
 
     struct ArrSeq : public ValueTree::Listener {
+        ValueTree arraySeq;
+
         float values[64];
         float ppq = 0.5;
         juce::CachedValue<int> size;
@@ -133,6 +135,12 @@ class Pattern {
         int currentPos;
 
         ArrSeq() {
+            arraySeq = ValueTree(IDs::ARRAYSEQ);
+            arraySeq.setProperty(IDs::arrayValue, "0000000000000000", nullptr);
+            arraySeq.setProperty(IDs::arraySize, 16, nullptr);
+            arraySeq.setProperty(IDs::arrayPpq, 2, nullptr);
+            size.referTo(arraySeq, IDs::arraySize, nullptr);
+            arraySeq.addListener(this);
             for(int i=0;i<64;i++)
                 values[i] = 0;
         }
@@ -145,6 +153,7 @@ class Pattern {
                 trigger->fire(target);
             }
         }
+
         void valueTreePropertyChanged(ValueTree &tree, const Identifier &property) {
             if ( property == IDs::arrayValue ) {
                 String newValue = tree.getProperty(IDs::arrayValue).toString();
@@ -172,15 +181,7 @@ public:
     Pattern() {
         value = ValueTree(IDs::pattern);
         for(int i=0;i<8;i++) {
-            ValueTree arraySeq(IDs::ARRAYSEQ);
-            arraySeq.setProperty(IDs::arrayValue, "0000000000000000", nullptr);
-            arraySeq.setProperty(IDs::arraySize, 16, nullptr);
-            arraySeq.setProperty(IDs::arrayPpq, 2, nullptr);
-
-            arrseq[i].size.referTo(arraySeq, IDs::arraySize, nullptr);
-
-            value.addListener(arrseq);
-            value.addChild(arraySeq, i, nullptr);
+            value.addChild(arrseq[i].arraySeq, i, nullptr);
         }
         value.setProperty(IDs::patternMuted, true, nullptr);
         muted.referTo(value, IDs::patternMuted, nullptr);
