@@ -172,36 +172,15 @@ public:
     }
 };
 
+
 class PatternEditor : public Component {
+    ComboBox presets;
     RowEditor rowEditors[8];
+    TextButton active;
 
 public:
-    PatternEditor() {
-        for(int i=0;i<8;i++) {
-            addAndMakeVisible(rowEditors[i]);
-        }
-    }
-
-    void setTriggers(ValueTree vt) {
-        for(int i=0;i<8;i++) {
-            rowEditors[i].setTrigger(vt.getChild(i));
-        }
-    }
-
-    void resized() {
-        int ratio = (getHeight()-10) / 8;
-        for(int i=0;i<8;i++) {
-            rowEditors[i].setBounds(2, (i * ratio) + 2, getWidth(), ratio-1);
-        }
-    }
-
-    void paint(juce::Graphics &g) {
-        g.fillAll(Colours::lightgrey);
-    }
-
-    void setActivePattern(ValueTree vt) {
-        for(int i=0;i<8;i++) {
-            rowEditors[i].setValue(vt.getChild(i));
-        }
-    }
+    PatternEditor();
+    void resized();
+    void setTriggers(ValueTree vt);
+    void setActivePattern(ValueTree vt);
 };

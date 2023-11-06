@@ -2,17 +2,25 @@
 #include "PluginEditor.h"
 #include "ext/value_tree_debugger.h"
 
+extern StringArray patternDef[];
+
 //==============================================================================
 AudioPluginAudioProcessorEditor::AudioPluginAudioProcessorEditor (AudioPluginAudioProcessor& p)
-    : AudioProcessorEditor (&p), processorRef (p) {
+    : AudioProcessorEditor (&p), processorRef (p), tabButton(TabbedButtonBar::Orientation::TabsAtBottom) {
     addAndMakeVisible(patternEditor);
     addAndMakeVisible(bpm);
+    addAndMakeVisible(tabButton);
     bpm.setSliderStyle(Slider::SliderStyle::LinearBarVertical);
     bpm.setSliderSnapsToMousePosition(false);
     bpm.setColour(Slider::trackColourId, Colours::transparentBlack);
     bpm.setRange(1,63, 1);
 
-    setSize (700, 600);
+    for(int i=0;i<8;i++) {
+        tabButton.addTab(String("Pattern ") + String(i+1), Colours::cadetblue, i);
+    }
+    tabButton.addChangeListener(this);
+
+    setSize (800, 600);
 
     patternEditor.setActivePattern(processorRef.rootVt.getChildWithName(IDs::PATTERNS).getChild(0));
     patternEditor.setTriggers(processorRef.rootVt.getChildWithName(IDs::TRIGGERS));
@@ -36,10 +44,15 @@ void AudioPluginAudioProcessorEditor::resized() {
     int height = getHeight();
 
     bpm.setBounds(5, 5, 40, 20);
-    patternEditor.setBounds(5, 50, width - 5, height - 230);
+    patternEditor.setBounds(5, 40, width - 5, height - 90);
+    tabButton.setBounds(5,height-50, width - 5, 45);
 }
 
 void AudioPluginAudioProcessorEditor::mouseDown(const MouseEvent &event) {
     auto vd = new ValueTreeDebugger();
     vd->setSource(processorRef.rootVt);
+}
+
+void AudioPluginAudioProcessorEditor::changeListenerCallback (ChangeBroadcaster* source) {
+    patternEditor.setActivePattern(processorRef.rootVt.getChildWithName(IDs::PATTERNS).getChild(tabButton.getCurrentTabIndex()));
 }

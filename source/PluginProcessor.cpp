@@ -16,7 +16,7 @@ AudioPluginAudioProcessor::AudioPluginAudioProcessor()
     bpm.referTo(root, IDs::bpm, nullptr);
     root.setProperty(IDs::internalSeq, false, nullptr);
     internalSeq.referTo(root, IDs::internalSeq, nullptr);
-    internalSeq = true;
+    internalSeq = false;
     ValueTree patterns(IDs::PATTERNS);
     for(int i=0;i<8;i++) {
         patterns.addChild(pattern[i].value, -1, nullptr);
@@ -28,10 +28,10 @@ AudioPluginAudioProcessor::AudioPluginAudioProcessor()
     root.addChild(patterns,-1, nullptr);
 
     ValueTree vtTriggers(IDs::TRIGGERS);
-    for(int i=0;i<8;i++) {
+    /*for(int i=44;i>=36;i--) {
         vtTriggers.addChild(triggers[i].vtTrigger, -1, nullptr);
-        triggers[i].vtTrigger.setProperty(IDs::triggerMidi, 48 + i, nullptr);
-    }
+        triggers[i].vtTrigger.setProperty(IDs::triggerMidi, 36 + i, nullptr);
+    }*/
     root.addChild(vtTriggers,-1, nullptr);
 
     rootVt = root;

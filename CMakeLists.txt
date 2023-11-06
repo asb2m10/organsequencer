@@ -20,7 +20,7 @@ juce_add_plugin(OrganSeq
     PLUGIN_CODE ORGS                            # A unique four-character plugin id with exactly one upper-case character
                                                 # GarageBand 10.3 requires the first letter to be upper-case, and the remaining letters to be lower-case
     FORMATS VST3 Standalone                     # The formats to build. Other valid formats are: AAX Unity VST AU AUv3
-    PRODUCT_NAME "Organic Sequencer")           # The name of the final executable, which can differ from the target name
+    PRODUCT_NAME "OrganSequencer")           # The name of the final executable, which can differ from the target name
 
 
 juce_generate_juce_header(OrganSeq)
@@ -30,6 +30,7 @@ target_sources(OrganSeq
     PRIVATE
         source/PluginEditor.cpp
         source/PluginProcessor.cpp
+        source/PatternEditor.cpp
         source/ext/value_tree_debugger.cpp)
 
 
