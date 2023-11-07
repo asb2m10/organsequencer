@@ -28,10 +28,10 @@ AudioPluginAudioProcessor::AudioPluginAudioProcessor()
     root.addChild(patterns,-1, nullptr);
 
     ValueTree vtTriggers(IDs::TRIGGERS);
-    /*for(int i=44;i>=36;i--) {
-        vtTriggers.addChild(triggers[i].vtTrigger, -1, nullptr);
-        triggers[i].vtTrigger.setProperty(IDs::triggerMidi, 36 + i, nullptr);
-    }*/
+    for(int i=0;i<8;i++) {
+        vtTriggers.addChild(triggers[i].vtTrigger, i, nullptr);
+        triggers[i].vtTrigger.setProperty(IDs::triggerMidi, 43-i, nullptr);
+    }
     root.addChild(vtTriggers,-1, nullptr);
 
     rootVt = root;

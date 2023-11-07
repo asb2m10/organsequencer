@@ -44,7 +44,7 @@ void AudioPluginAudioProcessorEditor::resized() {
     int height = getHeight();
 
     bpm.setBounds(5, 5, 40, 20);
-    patternEditor.setBounds(5, 40, width - 5, height - 90);
+    patternEditor.setBounds(5, 40, width - 10, height - 90);
     tabButton.setBounds(5,height-50, width - 5, 45);
 }
 

@@ -96,11 +96,13 @@ public:
 
 class RowEditor : public Component {
     ComboBox primPpq;
-    ValueTree values;
-    StepEditor stepEditor;
     Slider size;
     Slider trigger;
     Slider drift;
+    TextButton muted;
+    StepEditor stepEditor;
+
+    ValueTree values;
     ValueTree vtTrigger;
 
 public:
@@ -110,6 +112,7 @@ public:
         addAndMakeVisible(primPpq);
         addAndMakeVisible(drift);
         addAndMakeVisible(trigger);
+        addAndMakeVisible(muted);
 
         primPpq.addItemList(PPQ_VALUES, 1);
         primPpq.onChange = [this] {
@@ -136,6 +139,9 @@ public:
             vtTrigger.setProperty(IDs::triggerMidi, newTrigger, nullptr);
         };
 
+        muted.setClickingTogglesState(true);
+        muted.setButtonText("M");
+
         drift.setSliderStyle(Slider::SliderStyle::LinearHorizontal);
         drift.setTextBoxStyle(Slider::TextEntryBoxPosition::NoTextBox, true, 0, 0);
         drift.setRange(-4, 4, 0.25);
@@ -146,9 +152,10 @@ public:
     }
 
     void resized() {
-        primPpq.setBounds(5, 5, 70, 30);
-        drift.setBounds(75, 5, 90, 30);
-        stepEditor.setBounds(160, 5, getWidth() - 160 - 50 - 50, 30);
+        primPpq.setBounds(5, 5, 75, 30);
+        drift.setBounds(78, 5, 90, 30);
+        stepEditor.setBounds(162, 5, getWidth() - 162 - 70 - 50, 30);
+        muted.setBounds(getWidth() - 113, 5, 30, 30);
         size.setBounds(getWidth() - 73, 5, 30, 30);
         trigger.setBounds(getWidth() - 34, 5, 30, 30);
     }
@@ -177,6 +184,7 @@ class PatternEditor : public Component {
     ComboBox presets;
     RowEditor rowEditors[8];
     TextButton active;
+    ValueTree organPresets;
 
 public:
     PatternEditor();

@@ -4,8 +4,8 @@
 #include "Model.hpp"
 
 const int NUM_SEQ = 8;
-const StringArray PPQ_VALUES    = { "1/1", "1/2",  "1/4", "1/8", "1/16",  "1/32" };
-const float       PPQ_CORRESP[] = {   4.0,   2.0,    1.0,   0.5,   0.25,   0.125 };
+const StringArray PPQ_VALUES    = { "1/128", "1/64", "1/32T", "1/64D", "1/32", "1/16T", "1/32D", "1/16", "1/8T", "1/16D", "1/8", "1/4T", "1/8D", "1/4", "1/2T", "1/4D", "1/2", "1/1T", "1/2D", "1/1", "1/1D" };
+const float       PPQ_CORRESP[] = {   0.031250, 0.062500, 0.083333, 0.093750, 0.125000, 0.166667, 0.187500, 0.250000, 0.333333, 0.375000, 0.500000, 0.666667, 0.750000, 1.000000, 1.333333, 1.500000, 2.000000, 2.666667, 3.000000, 4.000000, 6.000000 };
 
 class Trigger : public ValueTree::Listener {
     int velocity = 100;
@@ -138,7 +138,8 @@ class Pattern {
             arraySeq = ValueTree(IDs::ARRAYSEQ);
             arraySeq.setProperty(IDs::arrayValue, "0000000000000000", nullptr);
             arraySeq.setProperty(IDs::arraySize, 16, nullptr);
-            arraySeq.setProperty(IDs::arrayPpq, 2, nullptr);
+            arraySeq.setProperty(IDs::arrayPpq, 13, nullptr);
+            arraySeq.setProperty(IDs::arrayMuted, false, nullptr);
             size.referTo(arraySeq, IDs::arraySize, nullptr);
             arraySeq.addListener(this);
             for(int i=0;i<64;i++)
@@ -157,13 +158,18 @@ class Pattern {
         void valueTreePropertyChanged(ValueTree &tree, const Identifier &property) {
             if ( property == IDs::arrayValue ) {
                 String newValue = tree.getProperty(IDs::arrayValue).toString();
-                for(int i=0;i<size;i++) {
+                int i;
+
+                for(i=0;i<newValue.length();i++) {
                     if ( newValue[i] == '0' )
                         values[i] = 0;
                     else
                         values[i] = 1;
                 }
 
+                for(; i<size;i++) {
+                    values[i] = 0;
+                }
                 return;
             }
 

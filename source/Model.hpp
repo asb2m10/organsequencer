@@ -20,5 +20,6 @@ namespace IDs
     DECLARE_ID(arraySize)
     DECLARE_ID(arrayPpq)
     DECLARE_ID(arrayMuted)
+    DECLARE_ID(ORGRANPRESETS)
 #undef DECLARE_ID
 }
