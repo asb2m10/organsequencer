@@ -185,10 +185,11 @@ class PatternEditor : public Component {
     RowEditor rowEditors[8];
     TextButton active;
     ValueTree organPresets;
+    ValueTree *activePattern = nullptr;
 
 public:
     PatternEditor();
     void resized();
     void setTriggers(ValueTree vt);
-    void setActivePattern(ValueTree vt);
+    void setActivePattern(ValueTree *vt);
 };

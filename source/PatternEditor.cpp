@@ -1,6 +1,7 @@
 #pragma once
 
 #include "PatternEditor.hpp"
+#include "ext/value_tree_debugger.h"
 
 const Identifier PRESETNAMES[] = {
     "16 BEAT", "BALLAD", "BEGUINE", "BOSSA", "CHA-CHA", "DISCO", "MAMBO", "MARCH",
@@ -33,25 +34,15 @@ PatternEditor::PatternEditor() {
 
     organPresets = ValueTree(IDs::ORGRANPRESETS);
     addPresetVT(organPresets, PRESETNAMES[0], StringArray {
-        "" ,
-        "" ,
-        "" ,
-        "" ,
+        "0000000000000000",
+        "0000000000000000",
+        "0000000000000000",
+        "0000000000000000", 
 
-        "" ,
-        "" ,
-        "" ,
-        "" ,
-
-        "" ,
-        "" ,
-        "" ,
-        "" ,
-
-        "" ,
-        "" ,
-        "" ,
-        ""
+        "0000000000000000",
+        "0000000000000000",
+        "0000001000000100",
+        "1000100010001000", 
     });
 
     for(int i=0;i<PRESETNAMES_NUM;i++) {
@@ -61,7 +52,15 @@ PatternEditor::PatternEditor() {
     presets.onChange = [this] {
         ValueTree newPreset = organPresets.getChild(presets.getSelectedItemIndex());
 
-        
+        //jassert( newPreset.isValid() );
+
+        if ( activePattern != nullptr ) {
+            // activePattern->copyPropertiesFrom(newPreset, nullptr);
+            // auto vd = new ValueTreeDebugger();
+            // vd->setSource(&(activePattern));
+        //    setActivePattern(activePattern);
+        }
+        //activePattern = newPreset;
     };
 }
 
@@ -81,8 +80,10 @@ void PatternEditor::setTriggers(ValueTree vt) {
     }
 }
 
-void PatternEditor::setActivePattern(ValueTree vt) {
+void PatternEditor::setActivePattern(ValueTree *vt) {
+    activePattern = vt;
+
     for(int i=0;i<8;i++) {
-        rowEditors[i].setValue(vt.getChild(i));
+        rowEditors[i].setValue(activePattern->getChild(i));
     }
 }

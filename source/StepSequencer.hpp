@@ -30,7 +30,12 @@ public:
         }
 
         if ( triggerPos >= 0 ) {
+            if ( triggerOffPos < 0 ) {
+                midiMessages.addEvent(juce::MidiMessage(0x90, note, 0), triggerPos);
+                triggerOffPos = -1;
+            }
             midiMessages.addEvent(juce::MidiMessage(0x90, note, velocity), triggerPos);
+            // printf("note on %d target %d\n", note, triggerOffPos);
             triggerPos = -1;
         }
 
@@ -38,19 +43,21 @@ public:
             triggerOffPos -= s;
             if ( triggerOffPos <= 0 ) {
                 midiMessages.addEvent(juce::MidiMessage(0x90, note, 0), s - triggerOffPos);
+                // printf("note off %d %d\n", note, s - triggerOffPos);
                 triggerOffPos = -1;
             }
         }
     }
 
-    void fire(int s) {
-        fire(s, velocity);
+    void fire(int s, int dur) {
+        fire(s, dur, velocity);
     }
 
-    void fire(int s, int v) {
+    void fire(int s, int dur, int v) {
         triggerPos = s;
         velocity = v;
-        triggerOffPos = triggerPos + triggerLength;
+        if ( triggerOffPos == - 1) 
+            triggerOffPos = triggerPos + dur;
     }
 
     void panic() {
@@ -81,10 +88,11 @@ public:
 
 class Sequencer {
     int sampleRate;
-    double samplePpq;
     double ppqWindow;
     double tm;
 public:
+    double samplePpq;
+
     void setSampleRate(int s) {
         sampleRate = s;
     }
@@ -151,7 +159,7 @@ class Pattern {
             int target = seq.process(values, size, ppq, &currentPos);
 
             if ( target >= 0  && !muted ) {
-                trigger->fire(target);
+                trigger->fire(target, ppq * seq.samplePpq);
             }
         }
 
