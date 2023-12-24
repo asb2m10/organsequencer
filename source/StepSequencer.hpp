@@ -2,6 +2,7 @@
 
 #include "PluginProcessor.h"
 #include "Model.hpp"
+#include "trace.h"
 
 const int NUM_SEQ = 8;
 const StringArray PPQ_VALUES    = { "1/128", "1/64", "1/32T", "1/64D", "1/32", "1/16T", "1/32D", "1/16", "1/8T", "1/16D", "1/8", "1/4T", "1/8D", "1/4", "1/2T", "1/4D", "1/2", "1/1T", "1/2D", "1/1", "1/1D" };
@@ -35,7 +36,7 @@ public:
                 triggerOffPos = -1;
             }
             midiMessages.addEvent(juce::MidiMessage(0x90, note, velocity), triggerPos);
-            // printf("note on %d target %d\n", note, triggerOffPos);
+            TRACE("ADD");
             triggerPos = -1;
         }
 
@@ -43,7 +44,6 @@ public:
             triggerOffPos -= s;
             if ( triggerOffPos <= 0 ) {
                 midiMessages.addEvent(juce::MidiMessage(0x90, note, 0), s - triggerOffPos);
-                // printf("note off %d %d\n", note, s - triggerOffPos);
                 triggerOffPos = -1;
             }
         }
@@ -56,7 +56,7 @@ public:
     void fire(int s, int dur, int v) {
         triggerPos = s;
         velocity = v;
-        if ( triggerOffPos == - 1) 
+        if ( triggerOffPos == - 1)
             triggerOffPos = triggerPos + dur;
     }
 
@@ -90,6 +90,7 @@ class Sequencer {
     int sampleRate;
     double ppqWindow;
     double tm;
+
 public:
     double samplePpq;
 
@@ -98,12 +99,13 @@ public:
     }
 
     void setPos(float bpm, float t, int blockSize) {
-        samplePpq = ( 60.0 / ( bpm * 4 ) ) * sampleRate;
+        samplePpq = ( 60.0 / ( bpm ) ) * sampleRate;
         ppqWindow = ((double)blockSize) / samplePpq;
         tm = t;
     }
 
     void invalidatePos() {
+        //TRACE("INVALID");
         tm = -1;
     }
 

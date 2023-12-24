@@ -10,7 +10,7 @@ AudioPluginAudioProcessorEditor::AudioPluginAudioProcessorEditor (AudioPluginAud
       lookAndFeel(LookAndFeel_V4::getLightColourScheme()) {
 
     Desktop::getInstance().setDefaultLookAndFeel(&lookAndFeel);
-            
+
     addAndMakeVisible(patternEditor);
     addAndMakeVisible(bpm);
     addAndMakeVisible(tabButton);
@@ -26,7 +26,7 @@ AudioPluginAudioProcessorEditor::AudioPluginAudioProcessorEditor (AudioPluginAud
 
     setSize (800, 600);
 
-    patternEditor.setActivePattern(&(processorRef.rootVt.getChildWithName(IDs::PATTERNS).getChild(0)));
+    patternEditor.setActivePattern(processorRef.rootVt.getChildWithName(IDs::PATTERNS).getChild(0));
     patternEditor.setTriggers(processorRef.rootVt.getChildWithName(IDs::TRIGGERS));
 }
 
@@ -58,5 +58,5 @@ void AudioPluginAudioProcessorEditor::mouseDown(const MouseEvent &event) {
 }
 
 void AudioPluginAudioProcessorEditor::changeListenerCallback (ChangeBroadcaster* source) {
-    patternEditor.setActivePattern(&(processorRef.rootVt.getChildWithName(IDs::PATTERNS).getChild(tabButton.getCurrentTabIndex())));
+    patternEditor.setActivePattern(processorRef.rootVt.getChildWithName(IDs::PATTERNS).getChild(tabButton.getCurrentTabIndex()));
 }

@@ -3,7 +3,7 @@
 #include <juce_audio_processors/juce_audio_processors.h>
 #include "StepSequencer.hpp"
 #include "Model.hpp"
-
+#include "trace.h"
 //==============================================================================
 class AudioPluginAudioProcessor  : public juce::AudioProcessor
 {
@@ -12,7 +12,7 @@ class AudioPluginAudioProcessor  : public juce::AudioProcessor
     Pattern pattern[8];
     double internalJiffies = 0;
 
-    CachedValue<int> bpm;
+    float bpm = 110;
     CachedValue<bool> internalSeq;
     double samplePpq;
     double ppqWindow;
@@ -39,7 +39,6 @@ public:
 
     //==============================================================================
     const juce::String getName() const override;
-
     bool acceptsMidi() const override;
     bool producesMidi() const override;
     bool isMidiEffect() const override;

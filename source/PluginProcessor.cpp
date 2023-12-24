@@ -1,5 +1,6 @@
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
+#include <stdarg.h>
 
 //==============================================================================
 AudioPluginAudioProcessor::AudioPluginAudioProcessor()
@@ -11,9 +12,20 @@ AudioPluginAudioProcessor::AudioPluginAudioProcessor()
                        .withOutput ("Output", juce::AudioChannelSet::stereo(), true)
                      #endif
                        ) {
+
+    // avoid creating the log file if it is in standalone mode
+    if ( !JUCEApplication::isStandaloneApp() ) {
+        Logger *tmp = Logger::getCurrentLogger();
+        if ( tmp == NULL ) {
+            Logger::setCurrentLogger(FileLogger::createDateStampedLogger("OrgranSeq", "DebugSession-", "log", "OrganSeq Created"));
+        }
+    }
+    TRACE("Hi");
+
+
     ValueTree root(IDs::ROOT);
     root.setProperty(IDs::bpm, 120, nullptr);
-    bpm.referTo(root, IDs::bpm, nullptr);
+    //bpm.referTo(root, IDs::bpm, nullptr);
     root.setProperty(IDs::internalSeq, false, nullptr);
     internalSeq.referTo(root, IDs::internalSeq, nullptr);
     internalSeq = false;
@@ -112,8 +124,9 @@ void AudioPluginAudioProcessor::prepareToPlay (double sampleRate, int samplesPer
     for(int i=0;i<NUM_SEQ;i++) {
         triggers[i].setTriggerLength(0.5 * sampleRate);
     }
-    samplePpq = ( 60.0 / ( bpm * 4 ) ) * sampleRate;
+    samplePpq = ( 60.0 / ( bpm ) ) * sampleRate;
     ppqWindow = ((double)samplesPerBlock) / samplePpq;
+    TRACE("ppqWindow %f %f", samplePpq, ppqWindow);
 }
 
 void AudioPluginAudioProcessor::releaseResources()
@@ -157,7 +170,9 @@ void AudioPluginAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
         buffer.clear (i, 0, buffer.getNumSamples());
 
     if ( internalSeq ) {
-        sequencer.setPos(120, internalJiffies, buffer.getNumSamples());
+        sequencer.setPos(110, internalJiffies, buffer.getNumSamples());
+        TRACE("playing >>> %f %f %d", 110.0, internalJiffies, buffer.getNumSamples());
+
         internalJiffies += ppqWindow;
     } else {
         auto *playhead = getPlayHead();
@@ -166,12 +181,14 @@ void AudioPluginAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
             playhead->getCurrentPosition(posInfo);
             if ( posInfo.isPlaying || posInfo.isRecording ) {
                 sequencer.setPos(posInfo.bpm, posInfo.ppqPosition, buffer.getNumSamples());
+                TRACE("playing >>> %f %f %d %d", posInfo.bpm, posInfo.ppqPosition, buffer.getNumSamples());
             } else {
                 sequencer.invalidatePos();
             }
         } else {
             sequencer.invalidatePos();
         }
+
     }
 
     pattern[0].process(triggers, sequencer);
@@ -181,6 +198,11 @@ void AudioPluginAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
 
     for(int i=0;i<NUM_SEQ;i++) {
         triggers[i].advance(midiMessages, buffer.getNumSamples());
+    }
+
+    for (const auto meta : midiMessages) {
+        const auto msg = meta.getMessage();
+        //TRACE("%f %s", msg.getTimeStamp(), msg.getDescription().toRawUTF8());
     }
 }
 
@@ -216,4 +238,16 @@ void AudioPluginAudioProcessor::setStateInformation (const void* data, int sizeI
 juce::AudioProcessor* JUCE_CALLTYPE createPluginFilter()
 {
     return new AudioPluginAudioProcessor();
+}
+
+void dexed_trace(const char *source, const char *fmt, ...) {
+    char output[4096];
+    va_list argptr;
+    va_start(argptr, fmt);
+    vsnprintf(output, 4095, fmt, argptr);
+    va_end(argptr);
+
+    String dest;
+    dest << source << " " << output;
+    Logger::writeToLog(dest);
 }

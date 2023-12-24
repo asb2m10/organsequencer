@@ -37,12 +37,12 @@ PatternEditor::PatternEditor() {
         "0000000000000000",
         "0000000000000000",
         "0000000000000000",
-        "0000000000000000", 
+        "0000000000000000",
 
         "0000000000000000",
         "0000000000000000",
         "0000001000000100",
-        "1000100010001000", 
+        "1000100010001000",
     });
 
     for(int i=0;i<PRESETNAMES_NUM;i++) {
@@ -54,12 +54,12 @@ PatternEditor::PatternEditor() {
 
         //jassert( newPreset.isValid() );
 
-        if ( activePattern != nullptr ) {
+        //if ( activePattern != nullptr ) {
             // activePattern->copyPropertiesFrom(newPreset, nullptr);
             // auto vd = new ValueTreeDebugger();
             // vd->setSource(&(activePattern));
         //    setActivePattern(activePattern);
-        }
+        //}
         //activePattern = newPreset;
     };
 }
@@ -80,10 +80,10 @@ void PatternEditor::setTriggers(ValueTree vt) {
     }
 }
 
-void PatternEditor::setActivePattern(ValueTree *vt) {
+void PatternEditor::setActivePattern(ValueTree vt) {
     activePattern = vt;
 
     for(int i=0;i<8;i++) {
-        rowEditors[i].setValue(activePattern->getChild(i));
+        rowEditors[i].setValue(activePattern.getChild(i));
     }
 }
