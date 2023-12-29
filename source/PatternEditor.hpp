@@ -47,8 +47,10 @@ public:
     }
 
     void mouseDown(const MouseEvent &event) override {
-        if ( event.mods.isRightButtonDown() )
-            return;
+        if ( event.mods.isRightButtonDown() ) {
+                getParentComponent()->mouseDown(event);
+                return;
+        }
 
         float ratio = ((float)getWidth()) / size;
         float target = (int) (((float)event.getPosition().getX()) / ratio);
@@ -105,6 +107,8 @@ class RowEditor : public Component {
     ValueTree values;
     ValueTree vtTrigger;
 
+    void processAction();
+
 public:
     RowEditor() {
         addAndMakeVisible(stepEditor);
@@ -141,6 +145,10 @@ public:
 
         muted.setClickingTogglesState(true);
         muted.setButtonText("M");
+        muted.onClick = [this] {
+            bool state = muted.getToggleState();
+            values.setProperty(IDs::arrayMuted, state, nullptr);
+        };
 
         drift.setSliderStyle(Slider::SliderStyle::LinearHorizontal);
         drift.setTextBoxStyle(Slider::TextEntryBoxPosition::NoTextBox, true, 0, 0);
@@ -160,11 +168,17 @@ public:
         trigger.setBounds(getWidth() - 34, 5, 30, 30);
     }
 
+    void mouseDown(const MouseEvent &event) override {
+        processAction();
+        return;
+    }
+
     void setValue(ValueTree vt) {
         int targetSize = vt.getProperty(IDs::arraySize);
         size.setValue(targetSize, NotificationType::dontSendNotification);
         stepEditor.setValues(vt);
         stepEditor.setSize(targetSize);
+        muted.setToggleState(vt.getProperty(IDs::arrayMuted), NotificationType::dontSendNotification);
         int ppqIndex = vt.getProperty(IDs::arrayPpq);
         primPpq.setSelectedItemIndex(ppqIndex, NotificationType::dontSendNotification);
 
@@ -181,7 +195,7 @@ public:
 
 
 class PatternEditor : public Component {
-    ComboBox presets;
+    TextButton presets;
     RowEditor rowEditors[8];
     TextButton active;
     ValueTree organPresets;
@@ -192,4 +206,5 @@ public:
     void resized();
     void setTriggers(ValueTree vt);
     void setActivePattern(ValueTree vt);
+    void processPreset();
 };

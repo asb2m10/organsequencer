@@ -171,7 +171,7 @@ void AudioPluginAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
 
     if ( internalSeq ) {
         sequencer.setPos(110, internalJiffies, buffer.getNumSamples());
-        TRACE("playing >>> %f %f %d", 110.0, internalJiffies, buffer.getNumSamples());
+        //TRACE("playing >>> %f %f %d", 110.0, internalJiffies, buffer.getNumSamples());
 
         internalJiffies += ppqWindow;
     } else {
@@ -202,7 +202,7 @@ void AudioPluginAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
 
     for (const auto meta : midiMessages) {
         const auto msg = meta.getMessage();
-        //TRACE("%f %s", msg.getTimeStamp(), msg.getDescription().toRawUTF8());
+        TRACE("%f %s", msg.getTimeStamp(), msg.getDescription().toRawUTF8());
     }
 }
 

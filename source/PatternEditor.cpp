@@ -31,6 +31,10 @@ PatternEditor::PatternEditor() {
     addAndMakeVisible(presets);
     active.setClickingTogglesState(true);
     active.setButtonText("ACTIVE");
+    presets.setButtonText("Preset");
+    presets.onClick = [this] {
+        this->processPreset();
+    };
 
     organPresets = ValueTree(IDs::ORGRANPRESETS);
     addPresetVT(organPresets, PRESETNAMES[0], StringArray {
@@ -45,11 +49,11 @@ PatternEditor::PatternEditor() {
         "1000100010001000",
     });
 
-    for(int i=0;i<PRESETNAMES_NUM;i++) {
+    /*for(int i=0;i<PRESETNAMES_NUM;i++) {
         presets.addItem(PRESETNAMES[i].toString(), i+1);
-    }
+    }*/
 
-    presets.onChange = [this] {
+    /*presets.onChange = [this] {
         ValueTree newPreset = organPresets.getChild(presets.getSelectedItemIndex());
 
         //jassert( newPreset.isValid() );
@@ -61,7 +65,7 @@ PatternEditor::PatternEditor() {
         //    setActivePattern(activePattern);
         //}
         //activePattern = newPreset;
-    };
+    };*/
 }
 
 void PatternEditor::resized() {
@@ -70,7 +74,7 @@ void PatternEditor::resized() {
         rowEditors[i].setBounds(2, (i * ratio) + 30, getWidth() - 2, ratio-5);
     }
 
-    presets.setBounds(getWidth() - 300, 2, 220, 20);
+    presets.setBounds(getWidth() - 114, 2, 110, 20);
     active.setBounds(2, 2, 80, 20);
 }
 
@@ -86,4 +90,28 @@ void PatternEditor::setActivePattern(ValueTree vt) {
     for(int i=0;i<8;i++) {
         rowEditors[i].setValue(activePattern.getChild(i));
     }
+}
+
+void RowEditor::processAction() {
+    PopupMenu m;
+    m.addItem ("<< Shift Left", [this]() { TRACE("OK"); });
+    m.addItem (">> Shift Right", [this]() { TRACE("OK"); });
+    m.addSeparator();
+    m.addItem ("Clear", [this]() { TRACE("OK"); });
+    m.addItem ("Invert", [this]() { TRACE("OK"); });
+    m.showMenuAsync(PopupMenu::Options().withDeletionCheck(*this).withMousePosition());
+}
+
+void PatternEditor::processPreset() {
+    PopupMenu m;
+    m.addItem ("Clear", [this]() { TRACE("OK"); });
+    m.addItem ("Copy", [this]() { TRACE("OK"); });
+    m.addItem ("Paste", [this]() { TRACE("OK"); });
+    m.addSeparator();
+    for(int i=0;i<PRESETNAMES_NUM;i++) {
+        m.addItem(i+1, PRESETNAMES[i].toString(), true, false);
+    }
+    m.showMenuAsync(PopupMenu::Options().withDeletionCheck(*this).withMousePosition(), [this](int item) {
+        TRACE("Item returned %d", item);
+    });
 }

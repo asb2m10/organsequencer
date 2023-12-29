@@ -187,6 +187,10 @@ class Pattern {
                 int pos = tree.getProperty(IDs::arrayPpq);
                 ppq = PPQ_CORRESP[pos];
             }
+
+            if ( property == IDs::arrayMuted ) {
+                muted = tree.getProperty(IDs::arrayMuted);
+            }
         }
     };
     ArrSeq arrseq[NUM_SEQ];
