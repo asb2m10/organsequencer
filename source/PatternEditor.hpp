@@ -3,6 +3,38 @@
 #include <stdlib.h>
 #include "PluginProcessor.h"
 
+class SimpleRowLayout {
+    int x;
+    int y;
+    int w;
+    int h;
+
+    int sl = 0;
+    int sr = 0;
+public:
+    SimpleRowLayout(int startx, int starty, int width, int height, int gapx = 2, int gapy = 5) {
+        x = startx + gapx;
+        y = starty + gapy;
+        w = width - gapx*2;
+        h = height - gapy*2;
+    }
+
+    void addToLeft(Component &c, int size, int space = 5) {
+        c.setBounds(x+sl+space, y, size, h);
+        sl += space + size;
+    }
+
+    void addToRight(Component &c, int size, int space = 5) {
+        c.setBounds(w - sr - size - space, y, size, h);
+        sr += space + size;
+    }
+
+    void center(Component &c, int space = 5) {
+        c.setBounds(x+sl+space, y,  (w - sr - space) - (x+sl+space), h);
+    }
+};
+
+
 class StepEditor : public Component {
     int values[64];
 
@@ -33,13 +65,21 @@ public:
 
     void paint(juce::Graphics &g) {
         float ratio = ((float)getWidth()) / size;
-        g.fillAll(Colours::darkgrey);
+        g.fillAll(Colours::black);
+
+        int modulo = 4;
 
         for(int i=0;i<size;i++) {
             if ( values[i] != 0 )
-                g.setColour(juce::Colours::orange);
+                if ( i % modulo )
+                    g.setColour(juce::Colours::orange);
+                else
+                    g.setColour(juce::Colours::darkorange);
             else
-                g.setColour(juce::Colours::black);
+                if ( i % modulo )
+                    g.setColour(juce::Colours::grey);
+                else
+                    g.setColour(juce::Colours::darkgrey);
             int x = i*ratio;
 
             g.fillRect( ratio*i , 0., ratio, ((float)getHeight()) );
@@ -98,29 +138,37 @@ public:
 
 class RowEditor : public Component {
     ComboBox primPpq;
+    ComboBox secPpq;
+    TextButton selectorPpq;
     Slider size;
     Slider trigger;
     Slider drift;
     TextButton muted;
     StepEditor stepEditor;
-
-    ValueTree values;
     ValueTree vtTrigger;
 
     void processAction();
 
 public:
+    ValueTree values;
+
     RowEditor() {
         addAndMakeVisible(stepEditor);
         addAndMakeVisible(size);
         addAndMakeVisible(primPpq);
-        addAndMakeVisible(drift);
+        addAndMakeVisible(secPpq);
+        addAndMakeVisible(selectorPpq);
         addAndMakeVisible(trigger);
         addAndMakeVisible(muted);
 
         primPpq.addItemList(PPQ_VALUES, 1);
         primPpq.onChange = [this] {
-            values.setProperty(IDs::arrayPpq, primPpq.getSelectedItemIndex(), nullptr);
+            values.setProperty(IDs::arrayPpqPrim, primPpq.getSelectedItemIndex(), nullptr);
+        };
+
+        secPpq.addItemList(PPQ_VALUES, 1);
+        secPpq.onChange = [this] {
+            values.setProperty(IDs::arrayPpqSec, secPpq.getSelectedItemIndex(), nullptr);
         };
 
         size.setSliderStyle(Slider::SliderStyle::LinearBarVertical);
@@ -150,9 +198,17 @@ public:
             values.setProperty(IDs::arrayMuted, state, nullptr);
         };
 
-        drift.setSliderStyle(Slider::SliderStyle::LinearHorizontal);
-        drift.setTextBoxStyle(Slider::TextEntryBoxPosition::NoTextBox, true, 0, 0);
-        drift.setRange(-4, 4, 0.25);
+        selectorPpq.setClickingTogglesState(true);
+        selectorPpq.setButtonText("<");
+
+        selectorPpq.onClick = [this] {
+            bool state = selectorPpq.getToggleState();
+            if ( state )
+                selectorPpq.setButtonText(">");
+            else
+                selectorPpq.setButtonText("<");
+            values.setProperty(IDs::arrayPpqActive, state, nullptr);
+        };
     }
 
     void paint(juce::Graphics &g) {
@@ -160,12 +216,16 @@ public:
     }
 
     void resized() {
-        primPpq.setBounds(5, 5, 75, 30);
-        drift.setBounds(78, 5, 90, 30);
-        stepEditor.setBounds(162, 5, getWidth() - 162 - 70 - 50, 30);
-        muted.setBounds(getWidth() - 113, 5, 30, 30);
-        size.setBounds(getWidth() - 73, 5, 30, 30);
-        trigger.setBounds(getWidth() - 34, 5, 30, 30);
+        SimpleRowLayout layout(0, 0, getWidth(), getHeight());
+
+        layout.addToLeft(primPpq, 70);
+        layout.addToLeft(selectorPpq, 30);
+        layout.addToLeft(secPpq, 70);
+
+        layout.addToRight(trigger, 30);
+        layout.addToRight(size, 30);
+        layout.addToRight(muted, 30);
+        layout.center(stepEditor);
     }
 
     void mouseDown(const MouseEvent &event) override {
@@ -179,8 +239,11 @@ public:
         stepEditor.setValues(vt);
         stepEditor.setSize(targetSize);
         muted.setToggleState(vt.getProperty(IDs::arrayMuted), NotificationType::dontSendNotification);
-        int ppqIndex = vt.getProperty(IDs::arrayPpq);
+        int ppqIndex = vt.getProperty(IDs::arrayPpqPrim);
         primPpq.setSelectedItemIndex(ppqIndex, NotificationType::dontSendNotification);
+
+        ppqIndex = vt.getProperty(IDs::arrayPpqSec);
+        secPpq.setSelectedItemIndex(ppqIndex, NotificationType::dontSendNotification);
 
         values = vt;
         repaint();

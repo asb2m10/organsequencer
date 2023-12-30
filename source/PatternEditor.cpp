@@ -15,7 +15,7 @@ void addPresetVT(ValueTree &dest, Identifier id, StringArray sa) {
 
     for(int i=0;i<8;i++) {
         ValueTree row = ValueTree(IDs::ARRAYSEQ);
-        row.setProperty(IDs::arrayPpq, 13, nullptr);
+        row.setProperty(IDs::arrayPpqPrim, 13, nullptr);
         row.setProperty(IDs::arraySize, sz, nullptr);
         row.setProperty(IDs::arrayValue, sa[i], nullptr);
         vt.addChild(row, -1, nullptr);
@@ -38,20 +38,15 @@ PatternEditor::PatternEditor() {
 
     organPresets = ValueTree(IDs::ORGRANPRESETS);
     addPresetVT(organPresets, PRESETNAMES[0], StringArray {
+        "1111111111111111",
         "0000000000000000",
         "0000000000000000",
         "0000000000000000",
-        "0000000000000000",
-
         "0000000000000000",
         "0000000000000000",
         "0000001000000100",
         "1000100010001000",
     });
-
-    /*for(int i=0;i<PRESETNAMES_NUM;i++) {
-        presets.addItem(PRESETNAMES[i].toString(), i+1);
-    }*/
 
     /*presets.onChange = [this] {
         ValueTree newPreset = organPresets.getChild(presets.getSelectedItemIndex());
@@ -69,9 +64,9 @@ PatternEditor::PatternEditor() {
 }
 
 void PatternEditor::resized() {
-    int ratio = (getHeight()-35) / 8;
+    int ratio = (getHeight()-25) / 8;
     for(int i=0;i<8;i++) {
-        rowEditors[i].setBounds(2, (i * ratio) + 30, getWidth() - 2, ratio-5);
+        rowEditors[i].setBounds(2, (i * ratio) + 25, getWidth() - 2, ratio-5);
     }
 
     presets.setBounds(getWidth() - 114, 2, 110, 20);
@@ -104,7 +99,15 @@ void RowEditor::processAction() {
 
 void PatternEditor::processPreset() {
     PopupMenu m;
-    m.addItem ("Clear", [this]() { TRACE("OK"); });
+    m.addItem ("Clear", [this]() {
+        for(int i=0;i<8;i++) {
+
+        }
+
+
+
+
+    });
     m.addItem ("Copy", [this]() { TRACE("OK"); });
     m.addItem ("Paste", [this]() { TRACE("OK"); });
     m.addSeparator();
@@ -112,6 +115,16 @@ void PatternEditor::processPreset() {
         m.addItem(i+1, PRESETNAMES[i].toString(), true, false);
     }
     m.showMenuAsync(PopupMenu::Options().withDeletionCheck(*this).withMousePosition(), [this](int item) {
-        TRACE("Item returned %d", item);
+        ValueTree vt = organPresets.getChild(item-1);
+        if ( ! vt.isValid() )
+            return;
+
+        for(int i=0;i<8;i++) {
+            rowEditors[i].values.setProperty(IDs::arrayPpqPrim, vt.getChild(i).getProperty(IDs::arrayPpqPrim), nullptr);
+            rowEditors[i].values.setProperty(IDs::arrayPpqActive, 0, nullptr);
+            rowEditors[i].values.setProperty(IDs::arraySize, vt.getChild(i).getProperty(IDs::arraySize), nullptr);
+            rowEditors[i].values.setProperty(IDs::arrayValue, vt.getChild(i).getProperty(IDs::arrayValue), nullptr);
+            rowEditors[i].repaint();
+        }
     });
 }

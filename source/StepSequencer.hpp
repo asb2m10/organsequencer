@@ -138,7 +138,7 @@ class Pattern {
         ValueTree arraySeq;
 
         float values[64];
-        float ppq = 0.5;
+        float ppq = 1.0;
         juce::CachedValue<int> size;
         bool muted = false;
 
@@ -148,10 +148,12 @@ class Pattern {
             arraySeq = ValueTree(IDs::ARRAYSEQ);
             arraySeq.setProperty(IDs::arrayValue, "0000000000000000", nullptr);
             arraySeq.setProperty(IDs::arraySize, 16, nullptr);
-            arraySeq.setProperty(IDs::arrayPpq, 13, nullptr);
+            arraySeq.setProperty(IDs::arrayPpqPrim, 13, nullptr);
+            arraySeq.setProperty(IDs::arrayPpqSec, 13, nullptr);
+            arraySeq.setProperty(IDs::arrayPpqActive, 0, nullptr);
             arraySeq.setProperty(IDs::arrayMuted, false, nullptr);
-            size.referTo(arraySeq, IDs::arraySize, nullptr);
             arraySeq.addListener(this);
+            size.referTo(arraySeq, IDs::arraySize, nullptr);
             for(int i=0;i<64;i++)
                 values[i] = 0;
         }
@@ -183,9 +185,16 @@ class Pattern {
                 return;
             }
 
-            if ( property == IDs::arrayPpq ) {
-                int pos = tree.getProperty(IDs::arrayPpq);
+            if ( (property == IDs::arrayPpqPrim || property == IDs::arrayPpqSec ) || property == IDs::arrayPpqActive) {
+                int active = tree.getProperty(IDs::arrayPpqActive);
+                int pos;
+                if ( active ) {
+                    pos = tree.getProperty(IDs::arrayPpqSec);
+                } else {
+                    pos = tree.getProperty(IDs::arrayPpqPrim);
+                }
                 ppq = PPQ_CORRESP[pos];
+                TRACE("setting ppq %f", ppq);
             }
 
             if ( property == IDs::arrayMuted ) {

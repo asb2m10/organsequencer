@@ -18,9 +18,11 @@ namespace IDs
     DECLARE_ID(arrayValue)
     DECLARE_ID(arrayDrift)
     DECLARE_ID(arraySize)
-    DECLARE_ID(arrayPpq)
     DECLARE_ID(arrayPpqPrim)
     DECLARE_ID(arrayPpqSec)
+    DECLARE_ID(arrayPpqActive)
+    DECLARE_ID(arrayRecompute)
+    DECLARE_ID(arrayCode)
     DECLARE_ID(arrayMuted)
     DECLARE_ID(ORGRANPRESETS)
 #undef DECLARE_ID

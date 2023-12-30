@@ -24,7 +24,7 @@ AudioPluginAudioProcessorEditor::AudioPluginAudioProcessorEditor (AudioPluginAud
     }
     tabButton.addChangeListener(this);
 
-    setSize (800, 600);
+    setSize (900, 450);
 
     patternEditor.setActivePattern(processorRef.rootVt.getChildWithName(IDs::PATTERNS).getChild(0));
     patternEditor.setTriggers(processorRef.rootVt.getChildWithName(IDs::TRIGGERS));
