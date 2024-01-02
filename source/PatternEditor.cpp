@@ -143,6 +143,30 @@ void RowEditor::processAction() {
     m.showMenuAsync(PopupMenu::Options().withDeletionCheck(*this).withMousePosition());
 }
 
+struct PresetDef {
+    StringArray values;
+    float ppq;
+};
+
+struct PresetContainer {
+    PresetDef presets[PRESETNAMES_NUM];
+
+    PresetContainer() {
+        presets[0].values = StringArray {
+            "1111111111111111",
+            "0000000000000000",
+            "0000000000000000",
+            "0000000000000000",
+            "0000000000000000",
+            "0000000000000000",
+            "0000001000000100",
+            "1000100010001000",
+        };
+    }
+};
+
+PresetContainer presetContainer;
+
 void PatternEditor::processPreset() {
     PopupMenu m;
     m.addItem ("Clear", [this]() {
