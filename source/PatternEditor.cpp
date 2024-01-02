@@ -9,6 +9,38 @@ const Identifier PRESETNAMES[] = {
 };
 const int PRESETNAMES_NUM = 16;
 
+
+
+class PatternTool : public Component {
+    TextEditor script;
+    ValueTree content;
+    TextButton shiftLeft;
+    TextButton shiftRight;
+    TextButton clear;
+    TextButton addItem;
+    TextButton removeItem;
+
+public:
+    PatternTool(ValueTree vt) {
+        content = vt;
+        addAndMakeVisible(script);
+        addAndMakeVisible(shiftLeft);
+        shiftLeft.setButtonText("<<");
+        addAndMakeVisible(shiftRight);
+        shiftRight.setButtonText(">>");
+        addAndMakeVisible(clear);
+        clear.setButtonText("Clear");
+        addAndMakeVisible(addItem);
+        addItem.setButtonText("+");
+        addAndMakeVisible(removeItem);
+        removeItem.setButtonText("-");
+    }
+
+    void resized() override {
+
+    }
+};
+
 void addPresetVT(ValueTree &dest, Identifier id, StringArray sa) {
     ValueTree vt(id);
     int sz = sa[0].length();
@@ -31,6 +63,20 @@ PatternEditor::PatternEditor() {
     addAndMakeVisible(presets);
     active.setClickingTogglesState(true);
     active.setButtonText("ACTIVE");
+
+    active.onClick = [this] {
+                  auto colourSelector = std::make_unique<ColourSelector>();
+
+            colourSelector->setName ("background");
+            colourSelector->setCurrentColour (findColour (TextButton::buttonColourId));
+            colourSelector->setColour (ColourSelector::backgroundColourId, Colours::transparentBlack);
+            colourSelector->setSize (300, 400);
+
+            CallOutBox::launchAsynchronously (std::move (colourSelector), rowEditors[7].getScreenBounds(), nullptr);
+        
+
+    };
+
     presets.setButtonText("Preset");
     presets.onClick = [this] {
         this->processPreset();
@@ -103,9 +149,6 @@ void PatternEditor::processPreset() {
         for(int i=0;i<8;i++) {
 
         }
-
-
-
 
     });
     m.addItem ("Copy", [this]() { TRACE("OK"); });
