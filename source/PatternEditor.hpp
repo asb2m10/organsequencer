@@ -2,38 +2,7 @@
 
 #include <stdlib.h>
 #include "PluginProcessor.h"
-
-class SimpleRowLayout {
-    int x;
-    int y;
-    int w;
-    int h;
-
-    int sl = 0;
-    int sr = 0;
-public:
-    SimpleRowLayout(int startx, int starty, int width, int height, int gapx = 2, int gapy = 5) {
-        x = startx + gapx;
-        y = starty + gapy;
-        w = width - gapx*2;
-        h = height - gapy*2;
-    }
-
-    void addToLeft(Component &c, int size, int space = 5) {
-        c.setBounds(x+sl+space, y, size, h);
-        sl += space + size;
-    }
-
-    void addToRight(Component &c, int size, int space = 5) {
-        c.setBounds(w - sr - size - space, y, size, h);
-        sr += space + size;
-    }
-
-    void center(Component &c, int space = 5) {
-        c.setBounds(x+sl+space, y,  (w - sr - space) - (x+sl+space), h);
-    }
-};
-
+#include "layout.hpp"
 
 class StepEditor : public Component {
     int values[64];
@@ -146,9 +115,9 @@ class RowEditor : public Component {
     TextButton muted;
     StepEditor stepEditor;
     ValueTree vtTrigger;
+    TextButton action;
 
     void processAction();
-
 public:
     ValueTree values;
 
@@ -160,6 +129,7 @@ public:
         addAndMakeVisible(selectorPpq);
         addAndMakeVisible(trigger);
         addAndMakeVisible(muted);
+        addAndMakeVisible(action);
 
         primPpq.addItemList(PPQ_VALUES, 1);
         primPpq.onChange = [this] {
@@ -198,6 +168,11 @@ public:
             values.setProperty(IDs::arrayMuted, state, nullptr);
         };
 
+        action.setButtonText("A");
+        action.onClick = [this] {
+            processAction();
+        };
+
         selectorPpq.setClickingTogglesState(true);
         selectorPpq.setButtonText("<");
 
@@ -225,12 +200,8 @@ public:
         layout.addToRight(trigger, 30);
         layout.addToRight(size, 30);
         layout.addToRight(muted, 30);
+        layout.addToRight(action, 30);
         layout.center(stepEditor);
-    }
-
-    void mouseDown(const MouseEvent &event) override {
-        processAction();
-        return;
     }
 
     void setValue(ValueTree vt) {

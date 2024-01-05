@@ -11,17 +11,21 @@ const int PRESETNAMES_NUM = 16;
 
 
 
-class PatternTool : public Component {
+class PatternAction : public Component {
     TextEditor script;
     ValueTree content;
     TextButton shiftLeft;
     TextButton shiftRight;
     TextButton clear;
+    TextButton invert;
     TextButton addItem;
     TextButton removeItem;
 
+    TextButton runScript;
+    ComboBox reprocessScipt;
+
 public:
-    PatternTool(ValueTree vt) {
+    PatternAction(ValueTree vt) {
         content = vt;
         addAndMakeVisible(script);
         addAndMakeVisible(shiftLeft);
@@ -30,14 +34,40 @@ public:
         shiftRight.setButtonText(">>");
         addAndMakeVisible(clear);
         clear.setButtonText("Clear");
+        addAndMakeVisible(invert);
+        invert.setButtonText("Invert");
         addAndMakeVisible(addItem);
         addItem.setButtonText("+");
         addAndMakeVisible(removeItem);
         removeItem.setButtonText("-");
+
+        addAndMakeVisible(runScript);
+        runScript.setButtonText("RUN");
+
+        addAndMakeVisible(reprocessScipt);
+        reprocessScipt.addItem("NEVER", 1);
+        reprocessScipt.addItem("1 BAR", 2);
+        reprocessScipt.addItem("2 BAR", 3);
+                
+
     }
 
     void resized() override {
+        SimpleRowLayout top(0, 0, getWidth(), 40);
 
+        top.addToLeft(shiftLeft, 40);
+        top.addToLeft(shiftRight, 40);
+        top.addToLeft(addItem, 40);
+        top.addToLeft(removeItem, 40);
+
+        top.addToRight(invert, 50);
+        top.addToRight(clear, 50);
+
+        SimpleRowLayout bottom(0, getHeight() - 45, getWidth(), 40);
+        bottom.addToRight(runScript, 60);
+        bottom.addToRight(reprocessScipt, 150);
+
+        script.setBounds(5, 45, getWidth() - 10, getHeight() - 45 - 45 - 10);
     }
 };
 
@@ -65,15 +95,7 @@ PatternEditor::PatternEditor() {
     active.setButtonText("ACTIVE");
 
     active.onClick = [this] {
-                  auto colourSelector = std::make_unique<ColourSelector>();
 
-            colourSelector->setName ("background");
-            colourSelector->setCurrentColour (findColour (TextButton::buttonColourId));
-            colourSelector->setColour (ColourSelector::backgroundColourId, Colours::transparentBlack);
-            colourSelector->setSize (300, 400);
-
-            CallOutBox::launchAsynchronously (std::move (colourSelector), rowEditors[7].getScreenBounds(), nullptr);
-        
 
     };
 
@@ -134,14 +156,18 @@ void PatternEditor::setActivePattern(ValueTree vt) {
 }
 
 void RowEditor::processAction() {
-    PopupMenu m;
-    m.addItem ("<< Shift Left", [this]() { TRACE("OK"); });
-    m.addItem (">> Shift Right", [this]() { TRACE("OK"); });
-    m.addSeparator();
-    m.addItem ("Clear", [this]() { TRACE("OK"); });
-    m.addItem ("Invert", [this]() { TRACE("OK"); });
-    m.showMenuAsync(PopupMenu::Options().withDeletionCheck(*this).withMousePosition());
+    // PopupMenu m;
+    // m.addItem ("<< Shift Left", [this]() { TRACE("OK"); });
+    // m.addItem (">> Shift Right", [this]() { TRACE("OK"); });
+    // m.addSeparator();
+    // m.addItem ("Clear", [this]() { TRACE("OK"); });
+    // m.addItem ("Invert", [this]() { TRACE("OK"); });
+    // m.showMenuAsync(PopupMenu::Options().withDeletionCheck(*this).withMousePosition());
+    auto patternAction = std::make_unique<PatternAction>(vtTrigger);
+    patternAction->setSize (400, 200);
+    CallOutBox::launchAsynchronously (std::move (patternAction), action.getScreenBounds(), nullptr);    
 }
+
 
 struct PresetDef {
     StringArray values;
