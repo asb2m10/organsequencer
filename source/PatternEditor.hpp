@@ -105,7 +105,7 @@ public:
     }
 };
 
-class RowEditor : public Component {
+class RowEditor : public Component, public ValueTree::Listener {
     ComboBox primPpq;
     ComboBox secPpq;
     TextButton selectorPpq;
@@ -204,20 +204,30 @@ public:
         layout.center(stepEditor);
     }
 
-    void setValue(ValueTree vt) {
-        int targetSize = vt.getProperty(IDs::arraySize);
+    void refresh() {
+        int targetSize = values.getProperty(IDs::arraySize);
         size.setValue(targetSize, NotificationType::dontSendNotification);
-        stepEditor.setValues(vt);
+        stepEditor.setValues(values);
         stepEditor.setSize(targetSize);
-        muted.setToggleState(vt.getProperty(IDs::arrayMuted), NotificationType::dontSendNotification);
-        int ppqIndex = vt.getProperty(IDs::arrayPpqPrim);
+        muted.setToggleState(values.getProperty(IDs::arrayMuted), NotificationType::dontSendNotification);
+        int ppqIndex = values.getProperty(IDs::arrayPpqPrim);
         primPpq.setSelectedItemIndex(ppqIndex, NotificationType::dontSendNotification);
 
-        ppqIndex = vt.getProperty(IDs::arrayPpqSec);
+        ppqIndex = values.getProperty(IDs::arrayPpqSec);
         secPpq.setSelectedItemIndex(ppqIndex, NotificationType::dontSendNotification);
-
-        values = vt;
         repaint();
+    }
+
+    void setValue(ValueTree vt) {
+        values.removeListener(this);
+        values = vt;
+        refresh();
+        values.addListener(this);
+    }
+
+    void valueTreePropertyChanged(ValueTree &tree, const Identifier &property) {
+        TRACE("property changed");
+        refresh();
     }
 
     void setTrigger(ValueTree vt) {

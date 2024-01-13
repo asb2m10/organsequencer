@@ -250,4 +250,5 @@ void dexed_trace(const char *source, const char *fmt, ...) {
     String dest;
     dest << source << " " << output;
     Logger::writeToLog(dest);
+    printf("%s\n", dest.toRawUTF8());
 }

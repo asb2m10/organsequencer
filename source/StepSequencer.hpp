@@ -4,6 +4,8 @@
 #include "Model.hpp"
 #include "trace.h"
 
+String execute_jscript(ValueTree vt);
+
 const int NUM_SEQ = 8;
 const StringArray PPQ_VALUES    = { "1/128", "1/64", "1/32T", "1/64D", "1/32", "1/16T", "1/32D", "1/16", "1/8T", "1/16D", "1/8", "1/4T", "1/8D", "1/4", "1/2T", "1/4D", "1/2", "1/1T", "1/2D", "1/1", "1/1D" };
 const float       PPQ_CORRESP[] = {   0.031250, 0.062500, 0.083333, 0.093750, 0.125000, 0.166667, 0.187500, 0.250000, 0.333333, 0.375000, 0.500000, 0.666667, 0.750000, 1.000000, 1.333333, 1.500000, 2.000000, 2.666667, 3.000000, 4.000000, 6.000000 };
@@ -152,6 +154,7 @@ class Pattern {
             arraySeq.setProperty(IDs::arrayPpqSec, 13, nullptr);
             arraySeq.setProperty(IDs::arrayPpqActive, 0, nullptr);
             arraySeq.setProperty(IDs::arrayMuted, false, nullptr);
+            arraySeq.setProperty(IDs::arrayCode, "", nullptr);
             arraySeq.addListener(this);
             size.referTo(arraySeq, IDs::arraySize, nullptr);
             for(int i=0;i<64;i++)

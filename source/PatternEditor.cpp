@@ -9,8 +9,6 @@ const Identifier PRESETNAMES[] = {
 };
 const int PRESETNAMES_NUM = 16;
 
-
-
 class PatternAction : public Component {
     TextEditor script;
     ValueTree content;
@@ -28,28 +26,53 @@ public:
     PatternAction(ValueTree vt) {
         content = vt;
         addAndMakeVisible(script);
+        script.setMultiLine(true, false);
+        script.setReturnKeyStartsNewLine(true);
         addAndMakeVisible(shiftLeft);
         shiftLeft.setButtonText("<<");
+        shiftLeft.onClick = [this] {
+            String src = content.getProperty(IDs::arrayValue);
+            String end = src.substring(1);
+            String dest = end + src[0];
+            content.setProperty(IDs::arrayValue, dest, nullptr);
+        };
+
         addAndMakeVisible(shiftRight);
         shiftRight.setButtonText(">>");
+        shiftRight.onClick = [this] {
+            String src = content.getProperty(IDs::arrayValue);
+            String start = src.dropLastCharacters(1);
+            content.setProperty(IDs::arrayValue, start + src, nullptr);
+        };
+
         addAndMakeVisible(clear);
         clear.setButtonText("Clear");
+        clear.onClick = [this] {
+            String target = content.getProperty(IDs::arrayValue);
+            target = String::repeatedString("0", target.length());
+            content.setProperty(IDs::arrayValue, target, nullptr);
+        };
+
         addAndMakeVisible(invert);
         invert.setButtonText("Invert");
+
         addAndMakeVisible(addItem);
         addItem.setButtonText("+");
+
         addAndMakeVisible(removeItem);
         removeItem.setButtonText("-");
 
         addAndMakeVisible(runScript);
         runScript.setButtonText("RUN");
+        runScript.onClick = [this] {
+            content.setProperty(IDs::arrayCode, script.getText(), nullptr);
+            execute_jscript(content);
+        };
 
         addAndMakeVisible(reprocessScipt);
         reprocessScipt.addItem("NEVER", 1);
         reprocessScipt.addItem("1 BAR", 2);
         reprocessScipt.addItem("2 BAR", 3);
-                
-
     }
 
     void resized() override {
@@ -69,21 +92,8 @@ public:
 
         script.setBounds(5, 45, getWidth() - 10, getHeight() - 45 - 45 - 10);
     }
+private:
 };
-
-void addPresetVT(ValueTree &dest, Identifier id, StringArray sa) {
-    ValueTree vt(id);
-    int sz = sa[0].length();
-
-    for(int i=0;i<8;i++) {
-        ValueTree row = ValueTree(IDs::ARRAYSEQ);
-        row.setProperty(IDs::arrayPpqPrim, 13, nullptr);
-        row.setProperty(IDs::arraySize, sz, nullptr);
-        row.setProperty(IDs::arrayValue, sa[i], nullptr);
-        vt.addChild(row, -1, nullptr);
-    }
-    dest.addChild(vt, -1, nullptr);
-}
 
 PatternEditor::PatternEditor() {
     for(int i=0;i<8;i++) {
@@ -103,32 +113,6 @@ PatternEditor::PatternEditor() {
     presets.onClick = [this] {
         this->processPreset();
     };
-
-    organPresets = ValueTree(IDs::ORGRANPRESETS);
-    addPresetVT(organPresets, PRESETNAMES[0], StringArray {
-        "1111111111111111",
-        "0000000000000000",
-        "0000000000000000",
-        "0000000000000000",
-        "0000000000000000",
-        "0000000000000000",
-        "0000001000000100",
-        "1000100010001000",
-    });
-
-    /*presets.onChange = [this] {
-        ValueTree newPreset = organPresets.getChild(presets.getSelectedItemIndex());
-
-        //jassert( newPreset.isValid() );
-
-        //if ( activePattern != nullptr ) {
-            // activePattern->copyPropertiesFrom(newPreset, nullptr);
-            // auto vd = new ValueTreeDebugger();
-            // vd->setSource(&(activePattern));
-        //    setActivePattern(activePattern);
-        //}
-        //activePattern = newPreset;
-    };*/
 }
 
 void PatternEditor::resized() {
@@ -156,14 +140,7 @@ void PatternEditor::setActivePattern(ValueTree vt) {
 }
 
 void RowEditor::processAction() {
-    // PopupMenu m;
-    // m.addItem ("<< Shift Left", [this]() { TRACE("OK"); });
-    // m.addItem (">> Shift Right", [this]() { TRACE("OK"); });
-    // m.addSeparator();
-    // m.addItem ("Clear", [this]() { TRACE("OK"); });
-    // m.addItem ("Invert", [this]() { TRACE("OK"); });
-    // m.showMenuAsync(PopupMenu::Options().withDeletionCheck(*this).withMousePosition());
-    auto patternAction = std::make_unique<PatternAction>(vtTrigger);
+    auto patternAction = std::make_unique<PatternAction>(values);
     patternAction->setSize (400, 200);
     CallOutBox::launchAsynchronously (std::move (patternAction), action.getScreenBounds(), nullptr);    
 }
@@ -179,15 +156,38 @@ struct PresetContainer {
 
     PresetContainer() {
         presets[0].values = StringArray {
-            "1111111111111111",
+            "0000000000000000",
+            "0111011101010111",
             "0000000000000000",
             "0000000000000000",
             "0000000000000000",
             "0000000000000000",
-            "0000000000000000",
-            "0000001000000100",
-            "1000100010001000",
+            "0000001000001000",
+            "1000000010100000",
         };
+        presets[0].ppq = 13;
+        presets[1].values = StringArray {
+            "0000000000000000",
+            "0000000000000000",
+            "0000000000000000",
+            "0000000000000000",
+            "0000000000000000",
+            "0000000000000000",
+            "0000000000000000",
+            "0000000000000000",
+        };
+        presets[1].ppq = 13;
+        presets[2].values = StringArray {
+            "0101001001010010",
+            "0010010100100101",
+            "1000100010001000",
+            "0000000000000000",
+            "0000000000000000",
+            "0000000000000000",
+            "1001001000101000",
+            "0000000000000000",
+        };
+        presets[2].ppq = 13;
     }
 };
 
@@ -208,16 +208,41 @@ void PatternEditor::processPreset() {
         m.addItem(i+1, PRESETNAMES[i].toString(), true, false);
     }
     m.showMenuAsync(PopupMenu::Options().withDeletionCheck(*this).withMousePosition(), [this](int item) {
-        ValueTree vt = organPresets.getChild(item-1);
-        if ( ! vt.isValid() )
-            return;
-
+        item = item - 1;
         for(int i=0;i<8;i++) {
-            rowEditors[i].values.setProperty(IDs::arrayPpqPrim, vt.getChild(i).getProperty(IDs::arrayPpqPrim), nullptr);
+            rowEditors[i].values.setProperty(IDs::arrayPpqPrim, presetContainer.presets[item].ppq, nullptr);
             rowEditors[i].values.setProperty(IDs::arrayPpqActive, 0, nullptr);
-            rowEditors[i].values.setProperty(IDs::arraySize, vt.getChild(i).getProperty(IDs::arraySize), nullptr);
-            rowEditors[i].values.setProperty(IDs::arrayValue, vt.getChild(i).getProperty(IDs::arrayValue), nullptr);
-            rowEditors[i].repaint();
+            rowEditors[i].values.setProperty(IDs::arraySize, presetContainer.presets[item].values[i].length(), nullptr);
+            rowEditors[i].values.setProperty(IDs::arrayValue, presetContainer.presets[item].values[i], nullptr);
+            rowEditors[i].refresh();
         }
     });
+}
+
+
+String execute_jscript(ValueTree vt) {
+    JavascriptEngine engine;
+    Identifier seqID("seq");
+
+    String script = vt.getProperty(IDs::arrayCode);
+
+    Result first = engine.execute(script);
+    if ( first.failed() ) {
+        TRACE("First error %s", first.getErrorMessage().toRawUTF8());
+        return first.getErrorMessage();
+    }
+
+    auto ret = engine.getRootObjectProperties();
+
+    if ( ret.contains("seq") ) {
+        var seq = ret[seqID];
+
+        auto seqv = seq.getArray();
+        // for(int i=0;i++, seqv->size(); i++) {
+        //     int v = seqv->getFirst();
+        // }
+        
+    }
+
+    return "";
 }
