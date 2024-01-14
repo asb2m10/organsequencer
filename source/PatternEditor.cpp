@@ -20,7 +20,7 @@ class PatternAction : public Component {
     TextButton removeItem;
 
     TextButton runScript;
-    ComboBox reprocessScipt;
+    ComboBox reprocessScript;
 
 public:
     PatternAction(ValueTree vt) {
@@ -41,7 +41,9 @@ public:
         shiftRight.setButtonText(">>");
         shiftRight.onClick = [this] {
             String src = content.getProperty(IDs::arrayValue);
-            String start = src.dropLastCharacters(1);
+            String start = src.dropLastCharacters(src.length() - 1);
+            String target = start + src;
+            TRACE("%s %s = %s", src.toRawUTF8(), start.toRawUTF8(), target.toRawUTF8());
             content.setProperty(IDs::arrayValue, start + src, nullptr);
         };
 
@@ -69,10 +71,11 @@ public:
             execute_jscript(content);
         };
 
-        addAndMakeVisible(reprocessScipt);
-        reprocessScipt.addItem("NEVER", 1);
-        reprocessScipt.addItem("1 BAR", 2);
-        reprocessScipt.addItem("2 BAR", 3);
+        addAndMakeVisible(reprocessScript);
+        reprocessScript.addItem("NEVER", 1);
+        reprocessScript.addItem("1 BAR", 2);
+        reprocessScript.addItem("2 BAR", 3);
+        reprocessScript.setSelectedItemIndex(0);
     }
 
     void resized() override {
@@ -88,7 +91,7 @@ public:
 
         SimpleRowLayout bottom(0, getHeight() - 45, getWidth(), 40);
         bottom.addToRight(runScript, 60);
-        bottom.addToRight(reprocessScipt, 150);
+        bottom.addToRight(reprocessScript, 150);
 
         script.setBounds(5, 45, getWidth() - 10, getHeight() - 45 - 45 - 10);
     }
