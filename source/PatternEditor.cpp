@@ -41,10 +41,9 @@ public:
         shiftRight.setButtonText(">>");
         shiftRight.onClick = [this] {
             String src = content.getProperty(IDs::arrayValue);
-            String start = src.dropLastCharacters(src.length() - 1);
-            String target = start + src;
-            TRACE("%s %s = %s", src.toRawUTF8(), start.toRawUTF8(), target.toRawUTF8());
-            content.setProperty(IDs::arrayValue, start + src, nullptr);
+            String start = src.substring(0, src.length()-1);
+            String target = src[src.length()-1] + start;
+            content.setProperty(IDs::arrayValue, target, nullptr);
         };
 
         addAndMakeVisible(clear);
@@ -57,9 +56,42 @@ public:
 
         addAndMakeVisible(invert);
         invert.setButtonText("Invert");
+        invert.onClick = [this] {
+            String src = content.getProperty(IDs::arrayValue);
+            const char *srca = src.toRawUTF8();
+            char target[65];
+            int i;
+            for(i=0;i<src.length();i++)
+                target[i] = srca[i] == '1' ? '0' : '1';
+            target[i] = 0;
+            content.setProperty(IDs::arrayValue, String(target), nullptr);
+        };
 
         addAndMakeVisible(addItem);
         addItem.setButtonText("+");
+        addItem.onClick = [this] {
+            Random random;
+            String src = content.getProperty(IDs::arrayValue);
+            const char *srca = src.toRawUTF8();
+            char target[65];
+            int test[64];
+            int i, j;
+            for(i=0,j=0;i<src.length();i++) {
+                target[i] = srca[i];
+                if ( srca[i] == '0' ) {
+                    test[++j] = i;
+                }
+            }
+            j--;
+            if ( j == 0 )
+                return;
+            target[i] = 0;
+            int r = random.nextInt(j);
+            int newItem = test[r];
+            TRACE("adding to %d %d %d", r, j, newItem);
+            target[newItem] = '1';
+            content.setProperty(IDs::arrayValue, String(target), nullptr);
+        };
 
         addAndMakeVisible(removeItem);
         removeItem.setButtonText("-");
@@ -75,6 +107,7 @@ public:
         reprocessScript.addItem("NEVER", 1);
         reprocessScript.addItem("1 BAR", 2);
         reprocessScript.addItem("2 BAR", 3);
+        reprocessScript.addItem("4 BAR", 4);
         reprocessScript.setSelectedItemIndex(0);
     }
 
@@ -144,8 +177,8 @@ void PatternEditor::setActivePattern(ValueTree vt) {
 
 void RowEditor::processAction() {
     auto patternAction = std::make_unique<PatternAction>(values);
-    patternAction->setSize (400, 200);
-    CallOutBox::launchAsynchronously (std::move (patternAction), action.getScreenBounds(), nullptr);    
+    patternAction->setSize (450, 300);
+    CallOutBox::launchAsynchronously(std::move (patternAction), action.getScreenBounds(), nullptr);
 }
 
 
@@ -212,10 +245,11 @@ void PatternEditor::processPreset() {
     }
     m.showMenuAsync(PopupMenu::Options().withDeletionCheck(*this).withMousePosition(), [this](int item) {
         item = item - 1;
+        if ( item < 0 )
+            return;
         for(int i=0;i<8;i++) {
             rowEditors[i].values.setProperty(IDs::arrayPpqPrim, presetContainer.presets[item].ppq, nullptr);
             rowEditors[i].values.setProperty(IDs::arrayPpqActive, 0, nullptr);
-            rowEditors[i].values.setProperty(IDs::arraySize, presetContainer.presets[item].values[i].length(), nullptr);
             rowEditors[i].values.setProperty(IDs::arrayValue, presetContainer.presets[item].values[i], nullptr);
             rowEditors[i].refresh();
         }
@@ -244,7 +278,6 @@ String execute_jscript(ValueTree vt) {
         // for(int i=0;i++, seqv->size(); i++) {
         //     int v = seqv->getFirst();
         // }
-        
     }
 
     return "";

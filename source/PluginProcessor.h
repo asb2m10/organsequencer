@@ -9,7 +9,6 @@ class AudioPluginAudioProcessor  : public juce::AudioProcessor
 {
     Sequencer sequencer;
     Trigger triggers[NUM_SEQ];
-    Pattern pattern[8];
     double internalJiffies = 0;
 
     float bpm = 110;
@@ -19,6 +18,7 @@ class AudioPluginAudioProcessor  : public juce::AudioProcessor
 
 public:
     ValueTree rootVt;
+    Pattern pattern[8];
 
     //==============================================================================
     AudioPluginAudioProcessor();

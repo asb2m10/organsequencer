@@ -141,28 +141,25 @@ class Pattern {
 
         float values[64];
         float ppq = 1.0;
-        juce::CachedValue<int> size;
         bool muted = false;
-
+        int size;
         int currentPos;
 
         ArrSeq() {
             arraySeq = ValueTree(IDs::ARRAYSEQ);
             arraySeq.setProperty(IDs::arrayValue, "0000000000000000", nullptr);
-            arraySeq.setProperty(IDs::arraySize, 16, nullptr);
             arraySeq.setProperty(IDs::arrayPpqPrim, 13, nullptr);
             arraySeq.setProperty(IDs::arrayPpqSec, 13, nullptr);
             arraySeq.setProperty(IDs::arrayPpqActive, 0, nullptr);
             arraySeq.setProperty(IDs::arrayMuted, false, nullptr);
             arraySeq.setProperty(IDs::arrayCode, "", nullptr);
             arraySeq.addListener(this);
-            size.referTo(arraySeq, IDs::arraySize, nullptr);
             for(int i=0;i<64;i++)
                 values[i] = 0;
+            size = 16;
         }
 
         void process(Trigger *trigger, Sequencer &seq) {
-            int pos;
             int target = seq.process(values, size, ppq, &currentPos);
 
             if ( target >= 0  && !muted ) {
@@ -173,17 +170,15 @@ class Pattern {
         void valueTreePropertyChanged(ValueTree &tree, const Identifier &property) {
             if ( property == IDs::arrayValue ) {
                 String newValue = tree.getProperty(IDs::arrayValue).toString();
+                size = newValue.length();
+                jassert(size<64);
                 int i;
 
-                for(i=0;i<newValue.length();i++) {
+                for(i=0;i<size;i++) {
                     if ( newValue[i] == '0' )
                         values[i] = 0;
                     else
                         values[i] = 1;
-                }
-
-                for(; i<size;i++) {
-                    values[i] = 0;
                 }
                 return;
             }
@@ -226,6 +221,12 @@ public:
     void process(Trigger trigger[], Sequencer &seq) {
         for(int i=0;i<NUM_SEQ;i++) {
             arrseq[i].process(&trigger[i], seq);
+        }
+    }
+
+    void updatePos(int *pos) {
+        for(int i=0;i<NUM_SEQ;i++) {
+            pos[i] = arrseq[i].currentPos;
         }
     }
 };

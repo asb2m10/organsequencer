@@ -14,13 +14,11 @@ class StepEditor : public Component {
     int lastActive;
     int lastAction;
 public:
-    void setSize(int s) {
-        size = s;
-    }
-
     void setValues(ValueTree &vt) {
         this->vt = vt;
         String target = vt.getProperty(IDs::arrayValue);
+        jassert(target.length() < 64);
+        size = target.length();
 
         for(int i=0;i<target.length();i++) {
             if ( target[i] == '0' ) {
@@ -35,8 +33,7 @@ public:
     void paint(juce::Graphics &g) {
         float ratio = ((float)getWidth()) / size;
         g.fillAll(Colours::black);
-
-        int modulo = 4;
+        int modulo = size % 3 == 0 ? 3 : 4;
 
         for(int i=0;i<size;i++) {
             if ( values[i] != 0 )
@@ -147,8 +144,13 @@ public:
         size.setRange(1,63, 1);
         size.onValueChange = [this] {
             int newSize = (int)size.getValue();
-            values.setProperty(IDs::arraySize, newSize, nullptr);
-            stepEditor.setSize(newSize);
+            String targetArray = values.getProperty(IDs::arrayValue);
+            if ( targetArray.length() < newSize ) {
+                int missing = newSize - targetArray.length();
+                values.setProperty(IDs::arrayValue, targetArray + String::repeatedString("0", missing), nullptr);
+            } else {
+                values.setProperty(IDs::arrayValue, targetArray.substring(0, newSize), nullptr);
+            }
             stepEditor.repaint();
         };
 
@@ -205,10 +207,9 @@ public:
     }
 
     void refresh() {
-        int targetSize = values.getProperty(IDs::arraySize);
-        size.setValue(targetSize, NotificationType::dontSendNotification);
+        String arrayValue = values.getProperty(IDs::arrayValue);
+        size.setValue(arrayValue.length());
         stepEditor.setValues(values);
-        stepEditor.setSize(targetSize);
         muted.setToggleState(values.getProperty(IDs::arrayMuted), NotificationType::dontSendNotification);
         int ppqIndex = values.getProperty(IDs::arrayPpqPrim);
         primPpq.setSelectedItemIndex(ppqIndex, NotificationType::dontSendNotification);
@@ -226,7 +227,6 @@ public:
     }
 
     void valueTreePropertyChanged(ValueTree &tree, const Identifier &property) {
-        TRACE("property changed");
         refresh();
     }
 
@@ -251,4 +251,5 @@ public:
     void setTriggers(ValueTree vt);
     void setActivePattern(ValueTree vt);
     void processPreset();
+    void refreshPos();
 };

@@ -4,7 +4,7 @@
 #include "PatternEditor.hpp"
 
 //==============================================================================
-class AudioPluginAudioProcessorEditor  : public juce::AudioProcessorEditor, public juce::ChangeListener
+class AudioPluginAudioProcessorEditor  : public juce::AudioProcessorEditor, public juce::ChangeListener, public juce::Timer
 {
 public:
     explicit AudioPluginAudioProcessorEditor (AudioPluginAudioProcessor&);
@@ -13,12 +13,13 @@ public:
     PatternEditor patternEditor;
     Slider bpm;
     TabbedButtonBar tabButton;
+    int currentPos[8][8];
 
     //==============================================================================
     void paint (juce::Graphics&) override;
     void resized() override;
     void mouseDown(const MouseEvent &event);
-
+    void timerCallback() override;
     void changeListenerCallback (ChangeBroadcaster* source);
 private:
     // This reference is provided as a quick way for your editor to

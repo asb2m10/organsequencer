@@ -6,7 +6,7 @@ extern StringArray patternDef[];
 
 //==============================================================================
 AudioPluginAudioProcessorEditor::AudioPluginAudioProcessorEditor (AudioPluginAudioProcessor& p)
-    : AudioProcessorEditor (&p), processorRef (p), tabButton(TabbedButtonBar::Orientation::TabsAtBottom), 
+    : AudioProcessorEditor (&p), processorRef (p), tabButton(TabbedButtonBar::Orientation::TabsAtBottom),
       lookAndFeel(LookAndFeel_V4::getLightColourScheme()) {
 
     Desktop::getInstance().setDefaultLookAndFeel(&lookAndFeel);
@@ -28,9 +28,12 @@ AudioPluginAudioProcessorEditor::AudioPluginAudioProcessorEditor (AudioPluginAud
 
     patternEditor.setActivePattern(processorRef.rootVt.getChildWithName(IDs::PATTERNS).getChild(0));
     patternEditor.setTriggers(processorRef.rootVt.getChildWithName(IDs::TRIGGERS));
+
+    startTimer(300);
 }
 
 AudioPluginAudioProcessorEditor::~AudioPluginAudioProcessorEditor() {
+    stopTimer();
 }
 
 //==============================================================================
@@ -59,4 +62,11 @@ void AudioPluginAudioProcessorEditor::mouseDown(const MouseEvent &event) {
 
 void AudioPluginAudioProcessorEditor::changeListenerCallback (ChangeBroadcaster* source) {
     patternEditor.setActivePattern(processorRef.rootVt.getChildWithName(IDs::PATTERNS).getChild(tabButton.getCurrentTabIndex()));
+}
+
+void AudioPluginAudioProcessorEditor::timerCallback() {
+    for(int i=0;i<NUM_SEQ;i++) {
+        processorRef.pattern[i].updatePos(&(currentPos[i][0]));
+        TRACE("%d %d %d %d %d %d %d %d ", currentPos[i][0], currentPos[i][1],currentPos[i][2],currentPos[i][3],currentPos[i][4],currentPos[i][5],currentPos[i][6],currentPos[i][7]);
+    }
 }
