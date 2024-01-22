@@ -6,6 +6,7 @@
 
 class StepEditor : public Component {
     int values[64];
+    int activePos = 0;
 
     ValueTree vt;
     int size = 1;
@@ -36,19 +37,20 @@ public:
         int modulo = size % 3 == 0 ? 3 : 4;
 
         for(int i=0;i<size;i++) {
-            if ( values[i] != 0 )
-                if ( i % modulo )
-                    g.setColour(juce::Colours::orange);
-                else
-                    g.setColour(juce::Colours::darkorange);
-            else
-                if ( i % modulo )
-                    g.setColour(juce::Colours::grey);
-                else
-                    g.setColour(juce::Colours::darkgrey);
-            int x = i*ratio;
+            Colour itemColour = juce::Colours::lightgrey;
 
-            g.fillRect( ratio*i , 0., ratio, ((float)getHeight()) );
+            if ( values[i] != 0 )
+                itemColour = juce::Colours::orange;
+
+            if ( i % modulo == 0 ) 
+                itemColour = itemColour.darker(0.3f);
+
+            if ( i == activePos )
+                itemColour = itemColour.darker(0.4f);
+
+            int x = i*ratio;
+            g.setColour(itemColour);
+            g.fillRect(ratio*i , 0., ratio, ((float)getHeight()));
         }
     }
 
@@ -99,6 +101,13 @@ public:
         fstr[size] = 0;
 
         vt.setProperty(IDs::arrayValue, String(fstr), nullptr);
+    }
+
+    void setPosition(int pos) {
+        if ( pos != activePos ) {
+            activePos = pos;
+            repaint();
+        }
     }
 };
 
@@ -235,6 +244,10 @@ public:
         trigger.setValue(targetNote, NotificationType::dontSendNotification);
         vtTrigger = vt;
     }
+    
+    void setPosition(int pos) {
+        stepEditor.setPosition(pos);
+    }
 };
 
 
@@ -242,7 +255,6 @@ class PatternEditor : public Component {
     TextButton presets;
     RowEditor rowEditors[8];
     TextButton active;
-    ValueTree organPresets;
     ValueTree activePattern;
 
 public:
@@ -251,5 +263,10 @@ public:
     void setTriggers(ValueTree vt);
     void setActivePattern(ValueTree vt);
     void processPreset();
-    void refreshPos();
+
+    void setPosition(int *pos) {
+        for(int i=0;i<8;i++) {
+            rowEditors[i].setPosition(pos[i]);
+        }
+    }
 };

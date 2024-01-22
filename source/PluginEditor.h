@@ -13,7 +13,6 @@ public:
     PatternEditor patternEditor;
     Slider bpm;
     TabbedButtonBar tabButton;
-    int currentPos[8][8];
 
     //==============================================================================
     void paint (juce::Graphics&) override;

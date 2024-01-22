@@ -38,7 +38,6 @@ public:
                 triggerOffPos = -1;
             }
             midiMessages.addEvent(juce::MidiMessage(0x90, note, velocity), triggerPos);
-            TRACE("ADD");
             triggerPos = -1;
         }
 
@@ -107,7 +106,6 @@ public:
     }
 
     void invalidatePos() {
-        //TRACE("INVALID");
         tm = -1;
     }
 
