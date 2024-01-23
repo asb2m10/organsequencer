@@ -267,7 +267,7 @@ struct PresetContainer {
             "0000000000000000",
             "0000000000000000",
         };
-        presets[15].ppq = 13;
+        presets[15].ppq = 10;
 
 
     }
