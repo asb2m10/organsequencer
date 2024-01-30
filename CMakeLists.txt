@@ -31,6 +31,7 @@ target_sources(OrganSeq
         source/PluginEditor.cpp
         source/PluginProcessor.cpp
         source/PatternEditor.cpp
+        source/Presets.cpp
         source/ext/value_tree_debugger.cpp)
 
 

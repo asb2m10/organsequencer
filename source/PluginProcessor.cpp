@@ -22,27 +22,21 @@ AudioPluginAudioProcessor::AudioPluginAudioProcessor()
     }
     TRACE("Hi");
 
-
     ValueTree root(IDs::ROOT);
     root.setProperty(IDs::bpm, 120, nullptr);
-    //bpm.referTo(root, IDs::bpm, nullptr);
     root.setProperty(IDs::internalSeq, false, nullptr);
     internalSeq.referTo(root, IDs::internalSeq, nullptr);
     internalSeq = false;
     ValueTree patterns(IDs::PATTERNS);
-    for(int i=0;i<8;i++) {
+    for(int i=0;i<NUM_PATTERN;i++) {
         patterns.addChild(pattern[i].value, -1, nullptr);
-
-        if ( i == 0 ) {
-            patterns.getChild(0).setProperty(IDs::patternMuted, false, nullptr);
-        }
     }
     root.addChild(patterns,-1, nullptr);
 
     ValueTree vtTriggers(IDs::TRIGGERS);
-    for(int i=0;i<8;i++) {
+    for(int i=0;i<NUM_SEQ;i++) {
         vtTriggers.addChild(triggers[i].vtTrigger, i, nullptr);
-        triggers[i].vtTrigger.setProperty(IDs::triggerMidi, 43-i, nullptr);
+        triggers[i].vtTrigger.setProperty(IDs::triggerMidi, 47-i, nullptr);
     }
     root.addChild(vtTriggers,-1, nullptr);
 
@@ -171,8 +165,6 @@ void AudioPluginAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
 
     if ( internalSeq ) {
         sequencer.setPos(110, internalJiffies, buffer.getNumSamples());
-        //TRACE("playing >>> %f %f %d", 110.0, internalJiffies, buffer.getNumSamples());
-
         internalJiffies += ppqWindow;
     } else {
         auto *playhead = getPlayHead();
@@ -181,20 +173,35 @@ void AudioPluginAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
             playhead->getCurrentPosition(posInfo);
             if ( posInfo.isPlaying || posInfo.isRecording ) {
                 sequencer.setPos(posInfo.bpm, posInfo.ppqPosition, buffer.getNumSamples());
-                TRACE("playing >>> %f %f %d %d", posInfo.bpm, posInfo.ppqPosition, buffer.getNumSamples());
+                for (const auto meta : midiMessages) {
+                    const auto msg = meta.getMessage();
+                    if ( msg.isAllNotesOff() ) {
+                        for(int i=0;i<NUM_PATTERN;i++) {
+                            pattern[i].active = false;
+                        }
+                    }
+                    int target = msg.getNoteNumber() - 12;
+                    if ( target >= 0 || target < 8 ) {
+                        pattern[target].active = msg.isNoteOn();
+                    }
+                }
             } else {
                 sequencer.invalidatePos();
+                for(int i=0;i<NUM_PATTERN;i++) {
+                    pattern[i].active = false;
+                }
             }
         } else {
             sequencer.invalidatePos();
+            for(int i=0;i<NUM_PATTERN;i++) {
+                pattern[i].active = false;
+            }
         }
-
     }
+    midiMessages.clear();
 
-    pattern[0].process(triggers, sequencer);
-
-    /*for(int i=0;i<8;i++)
-        pattern[i].process(triggers, sequencer);*/
+    for(int i=0;i<NUM_PATTERN;i++)
+        pattern[i].process(triggers, sequencer);
 
     for(int i=0;i<NUM_SEQ;i++) {
         triggers[i].advance(midiMessages, buffer.getNumSamples());

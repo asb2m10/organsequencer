@@ -13,7 +13,7 @@ namespace IDs
     DECLARE_ID(triggerMidi)
     DECLARE_ID(PATTERNS)
     DECLARE_ID(pattern)
-    DECLARE_ID(patternMuted)
+    DECLARE_ID(patternSoftActive)
     DECLARE_ID(ARRAYSEQ)
     DECLARE_ID(arrayValue)
     DECLARE_ID(arrayDrift)

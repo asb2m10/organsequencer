@@ -42,7 +42,7 @@ public:
             if ( values[i] != 0 )
                 itemColour = juce::Colours::orange;
 
-            if ( i % modulo == 0 ) 
+            if ( i % modulo == 0 )
                 itemColour = itemColour.darker(0.3f);
 
             if ( i == activePos )
@@ -244,7 +244,7 @@ public:
         trigger.setValue(targetNote, NotificationType::dontSendNotification);
         vtTrigger = vt;
     }
-    
+
     void setPosition(int pos) {
         stepEditor.setPosition(pos);
     }
@@ -253,7 +253,7 @@ public:
 
 class PatternEditor : public Component {
     TextButton presets;
-    RowEditor rowEditors[8];
+    RowEditor rowEditors[NUM_SEQ];
     TextButton active;
     ValueTree activePattern;
 
@@ -265,7 +265,7 @@ public:
     void processPreset();
 
     void setPosition(int *pos) {
-        for(int i=0;i<8;i++) {
+        for(int i=0;i<NUM_SEQ;i++) {
             rowEditors[i].setPosition(pos[i]);
         }
     }

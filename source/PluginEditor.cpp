@@ -23,7 +23,7 @@ AudioPluginAudioProcessorEditor::AudioPluginAudioProcessorEditor (AudioPluginAud
         tabButton.addTab(String("Pattern ") + String(i+1), Colours::cadetblue, i);
     }
     tabButton.addChangeListener(this);
-    setSize(930, 450);
+    setSize(930, 550);
 
     patternEditor.setActivePattern(processorRef.rootVt.getChildWithName(IDs::PATTERNS).getChild(0));
     patternEditor.setTriggers(processorRef.rootVt.getChildWithName(IDs::TRIGGERS));
@@ -65,7 +65,7 @@ void AudioPluginAudioProcessorEditor::changeListenerCallback (ChangeBroadcaster*
 
 void AudioPluginAudioProcessorEditor::timerCallback() {
     int active = tabButton.getCurrentTabIndex();
-    int currentPos[8];    
+    int currentPos[NUM_SEQ];
 
     processorRef.pattern[active].updatePos(&currentPos[0]);
     patternEditor.setPosition(&currentPos[0]);

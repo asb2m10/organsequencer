@@ -3,12 +3,6 @@
 #include "PatternEditor.hpp"
 #include "ext/value_tree_debugger.h"
 
-const Identifier PRESETNAMES[] = {
-    "16 BEAT", "BALLAD", "BEGUINE", "BOSSA", "CHA-CHA", "DISCO", "MAMBO", "MARCH",
-    "MERENGUE", "ROCK", "RUMBA", "SAMBA", "SHUFFLE", "SWING", "TANGO", "WALTZ"
-};
-const int PRESETNAMES_NUM = 16;
-
 class PatternAction : public Component {
     TextEditor script;
     ValueTree content;
@@ -131,7 +125,7 @@ public:
 };
 
 PatternEditor::PatternEditor() {
-    for(int i=0;i<8;i++) {
+    for(int i=0;i<NUM_SEQ;i++) {
         addAndMakeVisible(rowEditors[i]);
     }
     addAndMakeVisible(active);
@@ -140,8 +134,7 @@ PatternEditor::PatternEditor() {
     active.setButtonText("ACTIVE");
 
     active.onClick = [this] {
-
-
+        activePattern.setProperty(IDs::patternSoftActive, active.getToggleState(), nullptr);
     };
 
     presets.setButtonText("Preset");
@@ -151,8 +144,8 @@ PatternEditor::PatternEditor() {
 }
 
 void PatternEditor::resized() {
-    int ratio = (getHeight()-25) / 8;
-    for(int i=0;i<8;i++) {
+    int ratio = (getHeight()-25) / NUM_SEQ;
+    for(int i=0;i<NUM_SEQ;i++) {
         rowEditors[i].setBounds(2, (i * ratio) + 25, getWidth() - 2, ratio-5);
     }
 
@@ -161,7 +154,7 @@ void PatternEditor::resized() {
 }
 
 void PatternEditor::setTriggers(ValueTree vt) {
-    for(int i=0;i<8;i++) {
+    for(int i=0;i<NUM_SEQ;i++) {
         rowEditors[i].setTrigger(vt.getChild(i));
     }
 }
@@ -169,9 +162,11 @@ void PatternEditor::setTriggers(ValueTree vt) {
 void PatternEditor::setActivePattern(ValueTree vt) {
     activePattern = vt;
 
-    for(int i=0;i<8;i++) {
+    for(int i=0;i<NUM_SEQ;i++) {
         rowEditors[i].setValue(activePattern.getChild(i));
     }
+    bool isActive = activePattern.getProperty(IDs::patternSoftActive);
+    active.setToggleState(isActive, false);
 }
 
 void RowEditor::processAction() {
@@ -179,129 +174,6 @@ void RowEditor::processAction() {
     patternAction->setSize (450, 300);
     CallOutBox::launchAsynchronously(std::move (patternAction), action.getScreenBounds(), nullptr);
 }
-
-struct PresetDef {
-    StringArray values;
-    float ppq;
-};
-
-struct PresetContainer {
-    PresetDef presets[PRESETNAMES_NUM];
-
-    PresetContainer() {
-        presets[0].values = StringArray { // 16 BEAT
-            "0000000000000000",
-            "0111011101010111",
-            "0000000000000000",
-            "0000000000000000",
-            "0000000000000000",
-            "0000000000000000",
-            "0000001000001000",
-            "1000000010100000",
-        };
-        presets[0].ppq = 13;
-        presets[1].values = StringArray { // BALLAD
-            "0000000000000000",
-            "0010100010000000",
-            "0000000000000000",
-            "0000000000000000",
-            "0000000000000000",
-            "0000001000000000",
-            "0000000000000000",
-            "1000000000100000",
-        };
-        presets[1].ppq = 13;
-        presets[2].values = StringArray { // BEGUINE
-            "0101001001010010",
-            "0010010100100101",
-            "1000100010001000",
-            "0000000000000000",
-            "0000000000000000",
-            "0000000000000000",
-            "1001001000101000",
-            "0000000000000000",
-        };
-        presets[2].ppq = 13; 
-        presets[3].values = StringArray { // BOSSA
-            "0000000000000000",
-            "0100001101100101",
-            "0000000000000000",
-            "0000000000000000",
-            "0010010010010010",
-            "0000000000000000",
-            "0000000000000000",
-            "1001100010011000",
-        };
-        presets[3].ppq = 13;
-        presets[4].values = StringArray { // CHA-CHA
-            "1000100010000000",
-            "0010001000100000",
-            "0000000000001010",
-            "0000000000000000",
-            "1000100010101000",
-            "0000000000000000",
-            "0000000000000000",
-            "0000000000000000",
-        };
-        presets[4].ppq = 13;
-        presets[5].values = StringArray { // DISCO
-            "0000000000000000",
-            "0000000000000000",
-            "0000000000000000",
-            "0000000000000000",
-            "0000000000000000",
-            "0000000000000000",
-            "0000000000000000",
-            "0000000000000000",
-        };
-        presets[5].ppq = 13;
-
-
-        presets[15].values = StringArray { // LAST
-            "0000000000000000",
-            "0000000000000000",
-            "0000000000000000",
-            "0000000000000000",
-            "0000000000000000",
-            "0000000000000000",
-            "0000000000000000",
-            "0000000000000000",
-        };
-        presets[15].ppq = 10;
-
-
-    }
-};
-
-PresetContainer presetContainer;
-
-void PatternEditor::processPreset() {
-    PopupMenu m;
-    m.addItem ("Clear", [this]() {
-        for(int i=0;i<8;i++) {
-
-        }
-
-    });
-    m.addItem ("Copy", [this]() { TRACE("OK"); });
-    m.addItem ("Paste", [this]() { TRACE("OK"); });
-    m.addSeparator();
-    for(int i=0;i<PRESETNAMES_NUM;i++) {
-        m.addItem(i+1, PRESETNAMES[i].toString(), true, false);
-    }
-    m.showMenuAsync(PopupMenu::Options().withDeletionCheck(*this).withMousePosition(), [this](int item) {
-        item = item - 1;
-        if ( item < 0 )
-            return;
-        for(int i=0;i<8;i++) {
-            rowEditors[i].values.setProperty(IDs::arrayPpqPrim, presetContainer.presets[item].ppq, nullptr);
-            rowEditors[i].values.setProperty(IDs::arrayPpqActive, 0, nullptr);
-            rowEditors[i].values.setProperty(IDs::arrayValue, presetContainer.presets[item].values[i], nullptr);
-            rowEditors[i].refresh();
-        }
-    });
-}
-
 
 String execute_jscript(ValueTree vt) {
     JavascriptEngine engine;
