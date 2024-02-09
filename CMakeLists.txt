@@ -32,7 +32,8 @@ target_sources(OrganSeq
         source/PluginProcessor.cpp
         source/PatternEditor.cpp
         source/Presets.cpp
-        source/ext/value_tree_debugger.cpp)
+        source/ext/value_tree_debugger.cpp
+        source/ext/JavascriptCodeTokeniser.cpp)
 
 
 target_compile_definitions(OrganSeq

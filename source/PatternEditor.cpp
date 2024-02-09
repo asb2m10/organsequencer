@@ -2,9 +2,12 @@
 
 #include "PatternEditor.hpp"
 #include "ext/value_tree_debugger.h"
+#include "ext/JavascriptCodeTokeniser.h"
 
 class PatternAction : public Component {
-    TextEditor script;
+    CodeDocument codeDocument;
+    //TextEditor script;
+    CodeEditorComponent script;
     ValueTree content;
     TextButton shiftLeft;
     TextButton shiftRight;
@@ -14,14 +17,16 @@ class PatternAction : public Component {
     TextButton removeItem;
 
     TextButton runScript;
+    ComboBox presetScripts;
     ComboBox reprocessScript;
+    TextButton showLocation;
+    TextButton saveScript;
+    JavascriptTokeniser tokenizer;
 
 public:
-    PatternAction(ValueTree vt) {
+    PatternAction(ValueTree vt) : script(codeDocument, nullptr) {
         content = vt;
         addAndMakeVisible(script);
-        script.setMultiLine(true, false);
-        script.setReturnKeyStartsNewLine(true);
         addAndMakeVisible(shiftLeft);
         shiftLeft.setButtonText("<<");
         shiftLeft.onClick = [this] {
@@ -66,34 +71,43 @@ public:
         addItem.onClick = [this] {
             Random random;
             String src = content.getProperty(IDs::arrayValue);
-            const char *srca = src.toRawUTF8();
-            char target[65];
-            int test[64];
-            int i, j;
-            for(i=0,j=0;i<src.length();i++) {
-                target[i] = srca[i];
-                if ( srca[i] == '0' ) {
-                    test[++j] = i;
-                }
+            std::vector<int> posi;
+
+            for(int i=0;i<src.length();i++) {
+                if ( src[i] != '1' )
+                    posi.push_back(i);
             }
-            j--;
-            if ( j == 0 )
+
+            if ( posi.size() == 0 )
                 return;
-            target[i] = 0;
-            int r = random.nextInt(j);
-            int newItem = test[r];
-            TRACE("adding to %d %d %d", r, j, newItem);
-            target[newItem] = '1';
-            content.setProperty(IDs::arrayValue, String(target), nullptr);
+
+            int r = random.nextInt(posi.size());
+            content.setProperty(IDs::arrayValue, src.replaceSection(posi[r], 1, "1"), nullptr);
         };
 
         addAndMakeVisible(removeItem);
         removeItem.setButtonText("-");
+        removeItem.onClick = [this] {
+            Random random;
+            String src = content.getProperty(IDs::arrayValue);
+            std::vector<int> posi;
+
+            for(int i=0;i<src.length();i++) {
+                if ( src[i] == '1' )
+                    posi.push_back(i);
+            }
+
+            if ( posi.size() == 0 )
+                return;
+
+            int r = random.nextInt(posi.size());
+            content.setProperty(IDs::arrayValue, src.replaceSection(posi[r], 1, "0"), nullptr);
+        };
 
         addAndMakeVisible(runScript);
         runScript.setButtonText("RUN");
         runScript.onClick = [this] {
-            content.setProperty(IDs::arrayCode, script.getText(), nullptr);
+            content.setProperty(IDs::arrayCode, codeDocument.getAllContent(), nullptr);
             execute_jscript(content);
         };
 
@@ -103,6 +117,12 @@ public:
         reprocessScript.addItem("2 BAR", 3);
         reprocessScript.addItem("4 BAR", 4);
         reprocessScript.setSelectedItemIndex(0);
+
+        addAndMakeVisible(presetScripts);
+        showLocation.setButtonText("Show Location");
+        addAndMakeVisible(showLocation);
+        saveScript.setButtonText("Save");
+        addAndMakeVisible(saveScript);
     }
 
     void resized() override {
@@ -116,11 +136,16 @@ public:
         top.addToRight(invert, 50);
         top.addToRight(clear, 50);
 
+        SimpleRowLayout preset(0, getHeight() - 45 - 45, getWidth(), 40);
+        preset.addToRight(presetScripts, 200);
+        preset.addToRight(saveScript, 60);
+        preset.addToLeft(showLocation, 140);
+
         SimpleRowLayout bottom(0, getHeight() - 45, getWidth(), 40);
         bottom.addToRight(runScript, 60);
-        bottom.addToRight(reprocessScript, 150);
+        bottom.addToRight(reprocessScript, 200);
 
-        script.setBounds(5, 45, getWidth() - 10, getHeight() - 45 - 45 - 10);
+        script.setBounds(5, 45, getWidth() - 10, getHeight() - 45 - 45 - 45 - 10);
     }
 };
 
@@ -171,29 +196,54 @@ void PatternEditor::setActivePattern(ValueTree vt) {
 
 void RowEditor::processAction() {
     auto patternAction = std::make_unique<PatternAction>(values);
-    patternAction->setSize (450, 300);
+    patternAction->setSize (550, 350);
     CallOutBox::launchAsynchronously(std::move (patternAction), action.getScreenBounds(), nullptr);
+}
+
+Identifier seqID("seq");
+
+void exec_internal(JavascriptEngine &engine, String script) {
+    Result rc = engine.execute(script);
+
+    if ( rc.failed() ) {
+        TRACE("EXCEPTION %s" , rc.getErrorMessage().toRawUTF8());
+        throw rc.getErrorMessage();
+    }
 }
 
 String execute_jscript(ValueTree vt) {
     JavascriptEngine engine;
-    Identifier seqID("seq");
-
     String script = vt.getProperty(IDs::arrayCode);
 
-    Result first = engine.execute(script);
-    if ( first.failed() ) {
-        TRACE("First error %s", first.getErrorMessage().toRawUTF8());
-        return first.getErrorMessage();
+    try {
+        String ppqInject = String("ppq = ") + String(vt.getProperty(IDs::arrayPpqPrim));
+        exec_internal(engine, ppqInject);
+        exec_internal(engine, script);
+
+        auto ret = engine.getRootObjectProperties();
+
+        if ( ret.contains("seq") ) {
+            var seq = ret[seqID];
+
+            Array<juce::var> *seqarr = seq.getArray();
+
+            if ( seqarr != nullptr ) {
+                StringArray newArray;
+                for(int i=0;i<seqarr->size();i++) {
+                    int v = (*seqarr)[i];
+                    if ( v == 0 ) {
+                        newArray.add("0");
+                    } else {
+                        newArray.add("1");
+                    }
+                }
+
+                if ( newArray.size() != 0 )
+                    vt.setProperty(IDs::arrayValue, newArray.joinIntoString(""), nullptr);
+            }
+        }
+    } catch (String str) {
+        return str;
     }
-
-    auto ret = engine.getRootObjectProperties();
-
-    if ( ret.contains("seq") ) {
-        var seq = ret[seqID];
-
-        auto seqv = seq.getArray();
-    }
-
     return "";
 }
