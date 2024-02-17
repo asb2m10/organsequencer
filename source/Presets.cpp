@@ -31,7 +31,7 @@ struct PresetContainer {
             "0000001000001000",
             "1000000010100000",
         };
-        presets[0].ppq = 10;
+        presets[0].ppq = 7;
 
         presets[1].values = StringArray { // BALLAD
             "000000000000",
@@ -47,7 +47,7 @@ struct PresetContainer {
             "000000000000",
             "100000000010",
         };
-        presets[1].ppq = 10;
+        presets[1].ppq = 7;
 
         presets[2].values = StringArray { // BEGUINE
             "0000000000000000",
@@ -63,7 +63,7 @@ struct PresetContainer {
             "1001001000101000",
             "0000000000000000",
         };
-        presets[2].ppq = 10;
+        presets[2].ppq = 7;
 
         presets[3].values = StringArray { // BOSSA
             "0000000000000000",
@@ -79,7 +79,7 @@ struct PresetContainer {
             "0000000000000000",
             "1001100010011000",
         };
-        presets[3].ppq = 10;
+        presets[3].ppq = 7;
 
         presets[4].values = StringArray { // CHA-CHA
             "0000000000000000",
@@ -95,7 +95,7 @@ struct PresetContainer {
             "0000000000000000",
             "0000000000000000",
         };
-        presets[4].ppq = 10;
+        presets[4].ppq = 7;
 
         presets[5].values = StringArray { // DISCO
             "0000000000000000",
@@ -111,7 +111,7 @@ struct PresetContainer {
             "0000000000000000",
             "1000100010001000",
         };
-        presets[5].ppq = 10;
+        presets[5].ppq = 7;
 
         presets[6].values = StringArray { // MAMBO
             "0000000000000000",
@@ -127,7 +127,7 @@ struct PresetContainer {
             "0000000000000000",
             "1000100010001000",
         };
-        presets[6].ppq = 10;
+        presets[6].ppq = 7;
 
         presets[7].values = StringArray { // MARCH
             "0000000000000000",
@@ -143,7 +143,7 @@ struct PresetContainer {
             "0000000000000000",
             "1000100010001000",
         };
-        presets[7].ppq = 10;
+        presets[7].ppq = 7;
 
         presets[8].values = StringArray { // MERENGUE
             "0000000000000000",
@@ -159,7 +159,7 @@ struct PresetContainer {
             "0010001000000000",
             "1000000010000000",
         };
-        presets[8].ppq = 10;
+        presets[8].ppq = 7;
 
         presets[9].values = StringArray { // ROCK
             "0000000000000000",
@@ -175,7 +175,7 @@ struct PresetContainer {
             "0000000000000000",
             "1000001010000000",
         };
-        presets[9].ppq = 10;
+        presets[9].ppq = 7;
 
         presets[10].values = StringArray { // RUMBA
             "0000000000000000",
@@ -191,7 +191,7 @@ struct PresetContainer {
             "1000001000001000",
             "1000001010000000",
         };
-        presets[10].ppq = 10;
+        presets[10].ppq = 7;
 
         presets[11].values = StringArray { // SAMBA
             "0000000000000000",
@@ -207,7 +207,7 @@ struct PresetContainer {
             "0000000000000000",
             "1000000010000000",
         };
-        presets[11].ppq = 10;
+        presets[11].ppq = 7;
 
         presets[12].values = StringArray { // SHUFFLE
             "000000000000",
@@ -223,7 +223,7 @@ struct PresetContainer {
             "000000000000",
             "100000000000",
         };
-        presets[12].ppq = 10;
+        presets[12].ppq = 7;
 
         presets[13].values = StringArray { // SWING
             "000000000000",
@@ -239,7 +239,7 @@ struct PresetContainer {
             "000000000000",
             "100000000000",
         };
-        presets[13].ppq = 10;
+        presets[13].ppq = 7;
 
         presets[14].values = StringArray { // TANGO
             "0000000000000000",
@@ -255,7 +255,7 @@ struct PresetContainer {
             "0000000000000000",
             "1000000000000000",
         };
-        presets[14].ppq = 10;
+        presets[14].ppq = 7;
 
         presets[15].values = StringArray { // WALTZ
             "000000000000",
@@ -271,7 +271,7 @@ struct PresetContainer {
             "000000000000",
             "100000000000",
         };
-        presets[15].ppq = 10;
+        presets[15].ppq = 7;
     }
 };
 
