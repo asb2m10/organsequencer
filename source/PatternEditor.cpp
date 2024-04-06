@@ -216,7 +216,8 @@ String execute_jscript(ValueTree vt) {
     String script = vt.getProperty(IDs::arrayCode);
 
     try {
-        String ppqInject = String("ppq = ") + String(vt.getProperty(IDs::arrayPpqPrim));
+        String ppqValue = vt.getProperty(IDs::arrayPpqPrim);
+        String ppqInject = String("ppq = ") + String(ppqValue);
         exec_internal(engine, ppqInject);
         exec_internal(engine, script);
 
