@@ -68,7 +68,7 @@ jobs:
   #         ${{github.workspace}}/build/Source/*_artefacts/${{env.BUILD_TYPE}}/Standalone/*.app/**
 
   build-windows:
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
 
     steps:
     - uses: actions/checkout@v3
@@ -97,16 +97,16 @@ jobs:
         #  cmake --build ${{github.workspace}}/build --config $BUILD_TYPE
         export
 
-    - name: Show
-      shell: cmd
-      run: dir /s ${{github.workspace}}\build
+    # - name: Show
+    #   shell: cmd
+    #   run: dir /s ${{github.workspace}}\build
 
-    - name: Upload
-      uses: actions/upload-artifact@v3
-      with:
-        name: windows-bin
-        path: |
-          ${{github.workspace}}/build/Source/*_artefacts/$BUILD_TYPE/VST3/**
-          ${{github.workspace}}/build/Source/*_artefacts/$BUILD_TYPE/CLAP/*.clap/**
-          ${{github.workspace}}/build/Source/*_artefacts/$BUILD_TYPE/Standalone/*
+    # - name: Upload
+    #   uses: actions/upload-artifact@v3
+    #   with:
+    #     name: windows-bin
+    #     path: |
+    #       ${{github.workspace}}/build/Source/*_artefacts/$BUILD_TYPE/VST3/**
+    #       ${{github.workspace}}/build/Source/*_artefacts/$BUILD_TYPE/CLAP/*.clap/**
+    #       ${{github.workspace}}/build/Source/*_artefacts/$BUILD_TYPE/Standalone/*
 
