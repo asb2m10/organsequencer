@@ -21,7 +21,7 @@ AudioPluginAudioProcessor::AudioPluginAudioProcessor()
         }
     }
     TRACE("Hi");
-
+    
     ValueTree root(IDs::ROOT);
     root.setProperty(IDs::bpm, 120, nullptr);
     root.setProperty(IDs::internalSeq, false, nullptr);

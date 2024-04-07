@@ -4,6 +4,10 @@
 #include "ext/value_tree_debugger.h"
 #include "ext/JavascriptCodeTokeniser.h"
 
+#ifndef DEXED_ID
+    #define DEXED_ID "Test"
+#endif
+
 class PatternAction : public Component {
     CodeDocument codeDocument;
     //TextEditor script;
@@ -119,7 +123,7 @@ public:
         reprocessScript.setSelectedItemIndex(0);
 
         addAndMakeVisible(presetScripts);
-        showLocation.setButtonText("Show Location");
+        showLocation.setButtonText(DEXED_ID);
         addAndMakeVisible(showLocation);
         saveScript.setButtonText("Save");
         addAndMakeVisible(saveScript);
