@@ -87,6 +87,7 @@ jobs:
         fi
         echo $BUILD_TYPE
         echo $BUILD_VERSION
+        cat "$GITHUB_OUTPUT"
 
     - name: Build
       # Build your program with the given configuration
