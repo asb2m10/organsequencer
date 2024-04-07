@@ -3,8 +3,8 @@ name: juce-pipeline
 on:
   push:
     branches: [ main ]
-  pull_request:
-    branches: [ main ]
+    tags:
+      - '*'
 
 jobs:
   # build-linux:
@@ -82,7 +82,7 @@ jobs:
     runs-on: windows-latest
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
          submodules: recursive
 
@@ -113,7 +113,7 @@ jobs:
       with:
         name: windows-bin
         path: |
-          ${{github.workspace}}/build/*_artefacts/$${{ env.BUILD_TYPE }}/VST3/**
+          ${{github.workspace}}/build/*_artefacts/${{ env.BUILD_TYPE }}/VST3/*.vst3/**
           ${{github.workspace}}/build/*_artefacts/${{ env.BUILD_TYPE }}/CLAP/*.clap/**
-          ${{github.workspace}}/build/*_artefacts/${{ env.BUILD_TYPE }}/Standalone/*
+          ${{github.workspace}}/build/*_artefacts/${{ env.BUILD_TYPE }}/Standalone/*.exe
 
