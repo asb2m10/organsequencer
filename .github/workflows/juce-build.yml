@@ -95,8 +95,7 @@ jobs:
       run: |
         #  cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DDEXED_ID=$BUILD_VERSION
         #  cmake --build ${{github.workspace}}/build --config $BUILD_TYPE
-        echo $BUILD_TYPE
-        echo $BUILD_VERSION
+        export
 
     - name: Show
       shell: cmd
