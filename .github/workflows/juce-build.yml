@@ -72,8 +72,8 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
-      with:
-         submodules: recursive
+      # with:
+      #    submodules: recursive
 
     - name: Set build type
       shell: bash
@@ -88,9 +88,12 @@ jobs:
 
     - name: Build
       # Build your program with the given configuration
+      shell: bash
       run: |
-         cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DDEXED_ID=$BUILD_VERSION
-         cmake --build ${{github.workspace}}/build --config $BUILD_TYPE
+        #  cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DDEXED_ID=$BUILD_VERSION
+        #  cmake --build ${{github.workspace}}/build --config $BUILD_TYPE
+        echo $BUILD_TYPE
+        echo $BUILD_VERSION
 
     - name: Show
       shell: cmd
