@@ -151,8 +151,8 @@ class Pattern {
         ArrSeq() {
             arraySeq = ValueTree(IDs::ARRAYSEQ);
             arraySeq.setProperty(IDs::arrayValue, "0000000000000000", nullptr);
-            arraySeq.setProperty(IDs::arrayPpqPrim, 13, nullptr);
-            arraySeq.setProperty(IDs::arrayPpqSec, 13, nullptr);
+            arraySeq.setProperty(IDs::arrayPpqPrim, 7, nullptr);
+            arraySeq.setProperty(IDs::arrayPpqSec, 10, nullptr);
             arraySeq.setProperty(IDs::arrayPpqActive, 0, nullptr);
             arraySeq.setProperty(IDs::arrayMuted, false, nullptr);
             arraySeq.setProperty(IDs::arrayCode, "", nullptr);
